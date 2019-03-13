@@ -1,4 +1,4 @@
-# temp
+# Fitness Tracker
 
 ## Project setup
 ```
