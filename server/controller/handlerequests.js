@@ -10,3 +10,9 @@ app.post('/register', (req, res) => {
     else res.send(data)
   })
 })
+app.post('/login', (req, res) => {
+  user.checkuser(req.body, (err, data) => {
+    if (err) res.status(400).send(err.sqlMessage)
+    else res.send(data)
+  })
+})
