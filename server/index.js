@@ -3,9 +3,13 @@ const morgan = require('morgan')
 const cors = require('cors')
 const bodyparser = require('body-parser')
 const app = express()
+const handlerequest = require('./controller/handlerequests')
 
 app.use(morgan('combined'))
 app.use(cors())
 app.use(bodyparser.json())
-
+app.use('/', handlerequest)
+app.get('/', (req, res) => {
+  res.send("Hello!")
+})
 app.listen(3000, () => console.log('Listening at port 3000'))

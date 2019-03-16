@@ -13,7 +13,7 @@
   <div>
     <p style="color:red">{{err}}</p>
   </div>
-  <button type="button" @click="Register" class="btn btn-primary btn-lg">Register</button>
+  <button type="button" @click="Register()" class="btn btn-primary btn-lg">Register</button>
 </form>
   </div>
 </template>
@@ -34,11 +34,11 @@ export default {
       this.err = null
       try {
         await AuthenticationService.register({
-          email: this.email,
+          username: this.email,
           password: this.password
         })
       } catch (error) {
-        this.err = error.response.data
+        this.err = error.response.body.error
       }
     }
   }
