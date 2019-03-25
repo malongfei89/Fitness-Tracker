@@ -3,8 +3,8 @@ const bcrypt = require('bcrypt')
 const SALTROUND = 10
 
 module.exports= {
-  getPass(id, callback) {
-    conn.query('select * from users where id = ?', id, (err, data) => callback(err, data.password))
+  findUser(username, callback) {
+    conn.query('select * from users where username = ?', username, (err, data) => callback(err, data))
   }, 
   addUser(input, callback) {
     bcrypt.hash(input.password, SALTROUND, (err, hash) => {

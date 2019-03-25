@@ -3,6 +3,14 @@ const express = require('express')
 const app = express.Router()
 const bcrypt = require('bcrypt')
 
+app.get('/user/:username', (req, res) => {
+  user.findUser(req.body.username, (err, data) => {
+    if (err) res.status(403).send({
+      error: "There is no such user in our system!"
+    })
+    else res.send(data)
+  })
+})
 app.post('/register', (req, res) => {
   user.addUser(req.body, (err, data) => {
     if (err)
@@ -20,7 +28,7 @@ app.post('/changepw', (req, res) => {
 })
 app.post('/login', (req, res) => {
   user.checkUser(req.body, (err, data) => {
-    if (err) res.status(400).send(err.sqlMessage)
+    if (err) res.status(400).send({error: 'Invalid log in credential! '})
     else {
       bcrypt.compare(req.body.password, data[0].password, (err, isMatch) => {
         if (isMatch) res.send(data[0])
