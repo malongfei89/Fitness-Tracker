@@ -5,7 +5,7 @@ const SALTROUND = 10
 module.exports= {
   getPass(id, callback) {
     conn.query('select * from users where id = ?', id, (err, data) => callback(err, data.password))
-  },
+  }, 
   addUser(input, callback) {
     bcrypt.hash(input.password, SALTROUND, (err, hash) => {
       conn.query('insert into users (created_at, username, password) value(?)',
@@ -34,7 +34,7 @@ module.exports= {
     conn.query('select * from friends where users2_id = ? and frie_id = ?', [input.user_id, input.frie_id], (err, data) => {
       if (err) callback({error: err.sqlMessage})
       else {
-        if (data.length === 0)
+        if (data.length == 0)
           conn.query('insert into friends (created_at, users2_id, frie_id) value(?)', [[new Date(), input.user_id, input.frie_id]], (err, data) => callback(err, data))
         else callback({error: "You two are already friends!"})
       }
