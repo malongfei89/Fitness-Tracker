@@ -1,32 +1,33 @@
 const user = require('../models/user')
 const express = require('express')
 const app = express.Router()
+const bcrypt = require('bcrypt')
 
 app.post('/register', (req, res) => {
-  console.log(req.body)
   user.addUser(req.body, (err, data) => {
-    if (err) res.status(400).send({
-      error: 'The email is already in use!'
-    })
+    if (err)
+      res.status(403).send({
+        error: 'The email is already in use!'
+      })
     else res.send(data)
   })
 })
 app.patch('/changepw', (req, res) => {
   user.changePw(req.body, (err, data) => {
-    if (err) res.status(400).send(err.sqlMessage)
-    else  res.send(data)
+    if (err) res.status(400).send(err)
+    else res.send(data)
   })
 })
 app.post('/login', (req, res) => {
   user.checkUser(req.body, (err, data) => {
     if (err) res.status(400).send(err.sqlMessage)
     else {
-      if (req.body.password === data[0].password)
-        res.send(data[0])
-      else 
-        res.status(400).send({
+      bcrypt.compare(req.body.password, data[0].password, (err, isMatch) => {
+        if (isMatch) res.send(data[0])
+        else res.status(400).send({
           error: 'Invalid log in credential!'
         })
+      })
     }
   })
 })

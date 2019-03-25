@@ -7,4 +7,5 @@ const conn = mysql.createPool({
   password: process.env.MYSQL_PASS,
   database: process.env.MYSQL_DB
 })
+
 module.exports = conn
