@@ -1,46 +1,48 @@
 const conn = require('./mysql-connection')
 const bcrypt = require('bcrypt')
 const SALTROUND = 10
+const CustomError = require('./CustomError')
 
 module.exports= {
-  findUser(username, callback) {
-    conn.query('select * from users where username = ?', username, (err, data) => callback(err, data))
-  }, 
-  addUser(input, callback) {
-    bcrypt.hash(input.password, SALTROUND, (err, hash) => {
-      conn.query('insert into users (created_at, username, password) value(?)',
-      [[new Date(), input.username, hash]],
-      (err, data) => callback(err, data)
-    )
-    })
+  //look for a user by its username
+  findUser(username) {
+    return conn.query('select * from users where username = ?', username)
   },
-  checkUser(input, callback) {
-    conn.query('select password from users where username = ?', input.username, (err, data) => callback(err, data))
+  //after login in, grab information about the user
+  getInfo(id) {
+    return conn.query('select * from (select user_id, records.id, records.created_at, type, amount from records join exercise on records.exer_id = exercise.id) as allrecords where allrecords.user_id=?; select nickname, user_icon, frie_id from (select frie_id from friends where users2_id =?) as allfriends join users on allfriends.frie_id=users.id', [id,id])
   },
-  changePw(input, callback) {
-    conn.query('select password from users where id = ?', input.id, (err, data) => {
-      if (err) callback({error: err.sqlMessage})
-      else
-        bcrypt.compare(input.password, data[0].password, (err, isMatch) => {
-          if (isMatch) 
-            bcrypt.hash(input.newPassword, SALTROUND, (err, hash) => {
-              conn.query('update users set password = ? where (id = ?)', [hash, input.id], (err, data) => callback(err, data))
-            })
-          else callback({error:"The old password you entered doesn't match our record!"})
-        })
-    })
+  //register
+  async addUser(input) {
+    const hash = await bcrypt.hash(input.password, SALTROUND)
+    return conn.query('insert into users (created_at, username, password) value(?)',[[new Date(), input.username, hash]])
   },
-  addFriend(input, callback) {
-    conn.query('select * from friends where users2_id = ? and frie_id = ?', [input.user_id, input.frie_id], (err, data) => {
-      if (err) callback({error: err.sqlMessage})
-      else {
-        if (data.length == 0)
-          conn.query('insert into friends (created_at, users2_id, frie_id) value(?)', [[new Date(), input.user_id, input.frie_id]], (err, data) => callback(err, data))
-        else callback({error: "You two are already friends!"})
-      }
-    })
+  //update personal information
+  updateUser(input) {
+    return conn.query('update users set user_icon = ?,nickname = ?, first_name=?, last_name=?, birthday=? where (id=?)', [input.user_icon, input.nickname, input.first_name, input.last_name, input.birthday, input.id])
   },
-  removeFriend(input, callback) {
-    conn.query('delete from friends where users2_id = ? and frie_id = ?', [input.user_id, input.frie_id], (err, data) => callback(err, data))
+  //recover password
+  checkUser(input) {
+    return conn.query('select password from users where username = ?', input.username)
+  },
+  //update password
+  async changePw(input) {
+    //get user password based on id
+    const data = await conn.query('select password from users where id = ?', input.id)
+    const isMatch = await bcrypt.compare(input.password, data[0].password)
+    if (isMatch) {
+      const hash = await bcrypt.hash(input.newPassword, SALTROUND)
+      return conn.query('update users set password = ? where (id = ?)', [hash, input.id])
+    }
+    else throw new CustomError('The old password is incorrect!', 401)
+  },
+  async addFriend(input) {
+    const data = await conn.query('select * from friends where users2_id = ? and frie_id = ?', [input.user_id, input.frie_id])
+    if (data.length === 0)
+      return conn.query('insert into friends (created_at, users2_id, frie_id) value(?)', [[new Date(), input.user_id, input.frie_id]])
+    else throw new CustomError('You guys are already friends!', 404)
+  },
+  removeFriend(input) {
+    return conn.query('delete from friends where users2_id = ? and frie_id = ?', [input.user_id, input.frie_id])
   }
 }

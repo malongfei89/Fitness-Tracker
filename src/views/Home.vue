@@ -1,6 +1,15 @@
 <template>
   <div>
-    <Header />
+    <Header>
+      <template #customized1>
+        <router-link v-if="user.id != null" class="nav-link" active-class="active" to="/user">My Page</router-link>
+        <router-link v-else class="nav-link" active-class="active" to="/register">Register</router-link>
+      </template>
+      <template #customized2>
+        <router-link v-if="user.id == null" class="nav-link" active-class="active" to="/login">Log in<span class="sr-only">(current)</span></router-link>
+      </template>
+      <button v-if="user.id != null" class="btn btn-dark" @click="logout">Log out</button>
+    </Header>
     <p class="display-3">Welcome to Fitness Tracker!</p>
     <div class="text-center">
       <p class="lead">Here you can Track your exercise record and share with your friends through your fingertip!</p>
@@ -11,11 +20,39 @@
 
 <script>
 // @ is an alias to /src
-import Header from '@/components/Header.vue'
+import Header from '@/components/Header'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'home',
+  data () {
+    return {
+      user: {}
+    }
+  },
+  mounted () {
+    this.user = this.getUser()
+  },
   components: {
     Header
+  },
+  methods: {
+    ...mapActions([
+      'setUser'
+    ]),
+    ...mapGetters([
+      'getUser'
+    ]),
+    logout () {
+      this.setUser({
+        token: null,
+        id: null,
+        first_name: '',
+        last_name: '',
+        nickname: '',
+        birthday: null,
+        user_icon: ''
+      })
+    }
   }
 }
 </script>
