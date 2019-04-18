@@ -35,7 +35,7 @@
       <button type="button" @click="register" class="btn btn-dark btn-lg">Register</button>
     </form>
     <p class="text-center display-4" v-else>
-      Congratulations! You have successfully registered! You can
+      Congratulations! You have successfully registered! Your FitnessID is {{id}}! You can
       <span>
         <router-link to="/login">log-in</router-link>
       </span> now!
@@ -53,7 +53,8 @@ export default {
       email: '',
       password: '',
       registerSucceeded: false,
-      error: null
+      error: null,
+      id: null
     }
   },
   components: {
@@ -63,10 +64,11 @@ export default {
     async register () {
       this.error = null
       try {
-        await AuthenticationService.register({
+        const data = await AuthenticationService.register({
           username: this.email,
           password: this.password
         })
+        this.id = data.data.insertId
       } catch (error) {
         this.error = error.response.data.error
       } finally {

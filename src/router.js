@@ -6,6 +6,9 @@ import Login from '@/views/Login'
 import User from '@/views/User'
 import MyProfile from '@/views/MyProfile'
 import ChangePw from '@/views/ChangePw'
+import SearchFriend from '@/views/SearchFriend'
+import AddPost from '@/views/AddPost'
+import Friend from '@/views/Friend'
 
 Vue.use(Router)
 
@@ -29,9 +32,14 @@ export default new Router({
       component: Login
     },
     {
-      path: '/user',
+      path: '/user/:id',
       name: 'user',
       component: User
+    },
+    {
+      path: '/friend/:id',
+      name: 'friend',
+      component: Friend
     },
     {
       path: '/myProfile',
@@ -42,6 +50,16 @@ export default new Router({
       path: '/changePw',
       name: 'changePw',
       component: ChangePw
+    },
+    {
+      path: '/searchFriend',
+      name: 'searchFriend',
+      component: SearchFriend
+    },
+    {
+      path: '/addPost',
+      name: 'addPost',
+      component: AddPost
     }
   ]
 })

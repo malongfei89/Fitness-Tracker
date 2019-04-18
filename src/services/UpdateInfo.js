@@ -6,5 +6,11 @@ export default {
   },
   updatePw (credentials) {
     return Api().patch('/changePw', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  },
+  addPost (credentials) {
+    return Api().post('/addPost', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  },
+  addFriend (credentials) {
+    return Api().post('/searchFriend', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
   }
 }

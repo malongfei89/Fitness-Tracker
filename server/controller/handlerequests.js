@@ -6,17 +6,32 @@ const bcrypt = require('bcrypt')
 const CustomError = require('../models/CustomError')
 
 //search a user by username
-app.get('/user/:username', (req, res, next) => {
-  user.findUser(req.params.username)
+app.get('/searchFriend', (req, res, next) => {
+  console.log(req.query)
+  user.findUserById(req.query.id)
   .then(data => {
     if (!data[0]) throw new CustomError('There is no such user in our system!', 404)
-    else res.send(data)
+    else {
+      const { created_at, last_update, username, password, ...result} = data[0]
+      console.log(result)
+      res.send(result)
+    }
   })
   .catch(next)
 })
+app.post('/searchFriend', (req, res, next) => {
+  user.addFriend(req.body)
+  .then(() => res.sendStatus(200))
+  .catch(next)
+})
+app.delete('/removefriend', (req, res) => {
+  user.removeFriend(req.body)
+  .then(() => res.sendStatus(200))
+  .catch(next)
+})
 //retrive user's detail information
-app.post('/user', (req, res, next) => {
-  user.getInfo(req.body.id)
+app.get('/user/:id', (req, res, next) => {
+  user.getInfo(req.params.id)
   .then(data => res.send(data))
   .catch(next)
 })
@@ -34,7 +49,7 @@ app.patch('/changePw', (req, res, next) => {
 })
 app.post('/register', (req, res, next) => {
   user.addUser(req.body)
-  .then(() => res.sendStatus(200))
+  .then((data) => res.send(data))
   .catch(err => {
     if (err.code === 'ER_DUP_ENTRY')
       next(new CustomError('Email address is in use, pick a different one!', 403))
@@ -42,7 +57,7 @@ app.post('/register', (req, res, next) => {
   })
 })
 app.post('/login', (req, res, next) => {
-  user.findUser(req.body.username) 
+  user.findUserByUsername(req.body.username) 
   .then(data => {
     if (!data[0]) {
       throw new CustomError('Invalid log in credential!', 403)
@@ -67,14 +82,16 @@ app.post('/login', (req, res, next) => {
   })
   .catch(next)
 })
-app.post('/addfriend', (req, res, next) => {
-  user.addFriend(req.body)
+app.get('/addPost', (req, res, next) => {
+  user.getExerciseTypes()
+  .then((data) => res.send(data))
+  .catch(next)
+})
+app.post('/addPost', (req, res, next) => {
+  console.log(req.body)
+  user.addPost(req.body)
   .then(() => res.sendStatus(200))
   .catch(next)
 })
-app.delete('/removefriend', (req, res) => {
-  user.removeFriend(req.body)
-  .then(() => res.sendStatus(200))
-  .catch(next)
-})
+
 module.exports = app

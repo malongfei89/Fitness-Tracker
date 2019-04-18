@@ -2,13 +2,13 @@
   <div>
     <Header>
       <template #customized1>
-        <router-link v-if="user.id != null" class="nav-link" active-class="active" to="/user">My Page</router-link>
+        <router-link v-if="hasUser" class="nav-link" active-class="active" :to="`/user/${user.id}`">My Page</router-link>
         <router-link v-else class="nav-link" active-class="active" to="/register">Register</router-link>
       </template>
-      <template #customized2>
-        <router-link v-if="user.id == null" class="nav-link" active-class="active" to="/login">Log in<span class="sr-only">(current)</span></router-link>
+      <template #customized2 v-if="!hasUser">
+        <router-link class="nav-link" active-class="active" to="/login">Log in<span class="sr-only">(current)</span></router-link>
       </template>
-      <button v-if="user.id != null" class="btn btn-dark" @click="logout">Log out</button>
+      <button v-else class="btn btn-dark" @click="logout">Log out</button>
     </Header>
     <p class="display-3">Welcome to Fitness Tracker!</p>
     <div class="text-center">
@@ -27,6 +27,11 @@ export default {
   data () {
     return {
       user: {}
+    }
+  },
+  computed: {
+    hasUser: function () {
+      return this.user.id !== null
     }
   },
   mounted () {

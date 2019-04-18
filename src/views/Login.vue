@@ -65,7 +65,7 @@ export default {
           birthday: response.data.birthday,
           user_icon: response.data.user_icon
         })
-        this.$router.push('/user')
+        this.$router.push({ name: 'user', params: { id: response.data.id } })
       } catch (error) {
         this.error = error.response.data.error
       }

@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
   res.send("Hello!")
 })
 app.use((err, req, res, next) => {
-  console.log(err)
+  console.log(err.message)
   if (err.name === 'CustomError') res.status(err.status).send({error: err.message})
   else res.status(500).send({error :'Internal error, please try again later!'})
 })
