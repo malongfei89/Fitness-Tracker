@@ -9,5 +9,8 @@ export default {
   },
   getUserInfo (credentials) {
     return Api().get(`/searchFriend`, { params: { id: credentials.id }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  },
+  getFriendInfo (credentials) {
+    return Api().get(`/friend/${credentials.id}`, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
   }
 }

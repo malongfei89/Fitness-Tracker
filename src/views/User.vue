@@ -20,18 +20,19 @@
             </router-link>
           </div>
         </div>
-        <ol class="list-group ml-2">
-          <li class="" v-for="post in posts" :key="post.id">
+        <ol v-if="posts.length !== 0" class="list-group ml-2">
+          <li v-for="post in posts" :key="post.id">
             <div class="row">
               <span class="lead font-weight-bold col-8">
                 You did {{post.type}} for {{post.amount}}.
               </span>
-              <small class="text-right col-4">
-                Posted {{calculateTime(new Date(post.created_at))}}
+              <small class="text-right col-4 mt-1">
+                Posted {{displayTime(new Date(post.created_at))}}
               </small>
             </div>
           </li>
         </ol>
+        <h3 v-else class="text-center">Don't have any work-out record yet?<br>Press + to add some and share with your friend!</h3>
       </div>
       <div class="col-5 offset-1">
         <div class="row bg-secondary">
@@ -45,21 +46,24 @@
           </div>
         </div>
         <small class="font-italic">click on names to view friend page</small>
-        <ol class="list-group ml-2 mt-2">
-          <li class="" v-for="friend in friends" :key="friend.frie_id">
+        <ul class="list-group list-group-flush mt-2">
+          <li class="list-group-item" v-for="(friend, index) in friends" :key="friend.frie_id">
             <div class="row">
-              <div class="col-2"><i :class="friend.user_icon"></i></div>
-              <div class="col-3 lead font-weight-bold">
-                <span>
-                  <router-link class="btn btn-light" :to="`/friend/${friend.frie_id}`">{{friend.nickname || friend.first_name}}</router-link>
-                </span>
+              <div class="col-1 text-left mt-2"><p>{{index + 1}}.</p></div>
+              <div class="col-1">
+              <i v-if="friend.user_icon !== null" :class="`${friend.user_icon} fa-sm`"></i>
               </div>
-              <div class="col-5">Recent post: {{recentPostDate}}</div>
-              <div class="col-2"><button class="btn" @click="deleteFriend(friend.frie_id)"> <span><i class="fas fa-times" title="delete friend"></i></span>
-              </button></div>
+              <div class="col-3 offset-1"><router-link class="btn btn-light" :to="`/friend/${friend.frie_id}`">{{friend.nickname || friend.first_name}}</router-link>
             </div>
+            <div class="col-5">
+            <p class="mt-2">Last post: {{recentPostDate(friend.frie_id)}}</p>
+            </div><div class="col-1 text-right">
+              <button class="btn" @click="deleteFriend(friend.frie_id, index)">
+                <span><i class="fas fa-times fa-2x" title="delete friend"></i></span>
+              </button>
+            </div></div>
           </li>
-        </ol>
+        </ul>
       </div>
     </div>
   </div>
@@ -68,7 +72,10 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import GetInfo from '../services/GetInfo'
+import UpdateInfo from '../services/UpdateInfo'
 import Header from '@/components/Header'
+import toastr from 'toastr'
+import { calculateTime } from '@/services/Helper'
 export default {
   name: 'user',
   data () {
@@ -79,15 +86,10 @@ export default {
       activeStatus: []
     }
   },
+  computed: {
+  },
   components: {
     Header
-  },
-  computed: {
-    recentPostDate () {
-      // eslint-disable-next-line
-      let min = this.activeStatus.sort().reverse()[0]
-      return this.calculateTime(new Date(min.created_at))
-    }
   },
   async mounted () {
     this.user = this.getUser()
@@ -119,44 +121,34 @@ export default {
       this.$router.push('/')
     },
     greetname () {
-      if (this.user.first_name == null) {
+      if (this.user.first_name === null) {
         return 'user'
       } else return this.user.first_name
     },
-    calculateTime (date) {
-      var diff = Date.now() - date.getTime()
-      const day = 1000 * 60 * 60 * 24
-      var numOfYears = Math.floor(diff / day / 365)
-      var numOfMonths = Math.floor(diff / day / 30)
-      var numOfDays = Math.floor(diff / day)
-      var numOfHours = Math.floor(diff / day * 24)
-      var numOfminutes = Math.floor(diff / day * 24 * 60)
-      if (numOfYears > 0) {
-        if (numOfYears === 1) {
-          return (numOfYears + ' year ago.')
-        } else return (numOfYears + ' years ago.')
-      } else if (numOfMonths > 0) {
-        if (numOfMonths === 1) {
-          return (numOfMonths + ' month ago.')
-        } else return (numOfMonths + ' months ago.')
-      } else if (numOfDays > 0) {
-        if (numOfDays === 1) {
-          return ' yesterday.'
-        } else return (numOfDays + ' days ago.')
-      } else if (numOfHours > 0) {
-        if (numOfHours === 1) {
-          return ' 1 hour ago.'
-        } else return (numOfHours + ' hours ago.')
-      } else if (numOfminutes >= 0) {
-        if (numOfminutes === 0) {
-          return ' just now.'
-        } else if (numOfminutes === 1) {
-          return ' a minute ago.'
-        } else return (numOfminutes + ' minutes ago.')
-      }
+    displayTime (date) {
+      return calculateTime(date)
     },
-    deleteFriend (id) {
-      console.log(id)
+    recentPostDate (id) {
+      let minn = this.activeStatus.filter(data => data.user_id === id)
+      if (minn[0] === undefined) {
+        return 'N/A'
+      }
+      let min = this.activeStatus.filter(data => data.user_id === id).sort().reverse()[0]
+      return this.displayTime(new Date(min.created_at))
+    },
+    async deleteFriend (id, index) {
+      if (confirm('Are you sure you want to remove this friend?')) {
+        try {
+          await UpdateInfo.deleteFriend({
+            id: this.user.id,
+            frie_id: id,
+            token: this.user.token
+          })
+          this.friends.splice(index, 1)
+        } catch (error) {
+          toastr.error(error.response.data.error)
+        }
+      }
     }
   }
 }

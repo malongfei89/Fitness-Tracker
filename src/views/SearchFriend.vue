@@ -80,9 +80,9 @@ export default {
           id: parseInt(this.targetId),
           token: this.user.token
         })).data
+        this.$router.push({ name: 'searchFriend', query: { id: this.targetId } })
         this.findUserSucessfully = true
       } catch (error) {
-        console.log(error)
         this.error = error.response.data.error
       }
     },

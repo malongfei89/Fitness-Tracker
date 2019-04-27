@@ -13,25 +13,25 @@
     <div v-if="!isUpdated" class="container form-group mt-4">
       <h2>Please tell your friends more about you!</h2>
       <label for="usericon">User Icon:</label>
-      <input class="form-check-input-inline ml-4" value="fas fa-hiking ml-2 fa-2x" type="radio" v-model="userInformation.user_icon" >
+      <input class="form-check-input-inline ml-4" id="user_icon" value="fas fa-hiking ml-2 fa-2x" type="radio" >
       <i class="fas fa-hiking ml-2 fa-2x"></i>
-      <input class="form-check-input-inline ml-4" value="fas fa-dumbbell ml-2 fa-2x" type="radio" v-model="userInformation.user_icon">
+      <input class="form-check-input-inline ml-4" id="user_icon" value="fas fa-dumbbell ml-2 fa-2x" type="radio" >
       <i class="fas fa-dumbbell ml-2 fa-2x"></i>
-      <input class="form-check-input-inline ml-4" value="fas fa-running ml-2 fa-2x" type="radio" v-model="userInformation.user_icon">
+      <input class="form-check-input-inline ml-4" id="user_icon" value="fas fa-running ml-2 fa-2x" type="radio" >
       <i class="fas fa-running ml-2 fa-2x"></i>
-      <input class="form-check-input-inline ml-4" value="fas fa-swimmer ml-2 fa-2x" type="radio" v-model="userInformation.user_icon">
+      <input class="form-check-input-inline ml-4" id="user_icon" value="fas fa-swimmer ml-2 fa-2x" type="radio" >
       <i class="fas fa-swimmer ml-2 fa-2x"></i>
       <br>
       <label for="nickname">Nickname</label>
-      <input type="text" v-model="userInformation.nickname" id="nickname" class="form-control" aria-describedby="helpId">
+      <input type="text" :value="userInformation.nickname" id="nickname" class="form-control" aria-describedby="helpId">
       <small id="helpId" class="text-muted">How do you want your friends to call you</small>
       <br>
       <label for="first_name">First Name</label>
-      <input type="text" v-model="userInformation.first_name" id="first_name" class="form-control">
+      <input type="text" :value="userInformation.first_name" id="first_name" class="form-control">
       <label for="last_name">Last Name</label>
-      <input type="text" v-model="userInformation.last_name" id="last_name" class="form-control">
+      <input type="text" :value="userInformation.last_name" id="last_name" class="form-control">
       <label for="birthday">Birthday</label>
-      <input type="date" v-model="userInformation.birthday" id="birthday" class="form-control">
+      <input type="date" :value="userInformation.birthday" id="birthday" class="form-control">
       <div>
         <small style="color:red">{{error}}</small>
       </div>
@@ -42,19 +42,19 @@
       <h2 v-if="hasUpdates">Congratulations! You've successfully updated your profile!</h2>
       <h2 v-if="userInformation.nickname === null">Want your friend to know you more? Press the button on the top to edit your file</h2>
       <label class="mt-2">FitnessID:</label>
-      <input type="text" :value="userInformation.id" readonly id="id" class="form-control" aria-describedby="helpId">
+      <input type="text" :value="userInformation.id" readonly class="form-control" aria-describedby="helpId">
       <p>User Icon</p>
       <i :class="userInformation.user_icon"></i>
       <br>
       <label class="mt-2">Nickname</label>
-      <input type="text" :value="userInformation.nickname" readonly id="nickname" class="form-control" aria-describedby="helpId">
+      <input type="text" :value="userInformation.nickname" readonly class="form-control" aria-describedby="helpId">
       <br>
       <label>First Name</label>
-      <input type="text" :value="userInformation.first_name" readonly id="first_name" class="form-control">
+      <input type="text" :value="userInformation.first_name" readonly class="form-control">
       <label>Last Name</label>
-      <input type="text" :value="userInformation.last_name" readonly id="last_name" class="form-control">
+      <input type="text" :value="userInformation.last_name" readonly class="form-control">
       <label>Birthday</label>
-      <input type="date" :value="getRightDate" readonly id="birthday" class="form-control">
+      <input type="date" :value="getRightDate" readonly class="form-control">
     </div>
   </div>
 </template>
@@ -119,17 +119,39 @@ export default {
     },
     async updateProfile () {
       try {
-        if (!Object.keys(this.userInformation).every(key => this.userInformation[key])) {
+        const newInfo = {
+          user_icon: document.getElementById('user_icon').value,
+          nickname: document.getElementById('nickname').value,
+          first_name: document.getElementById('first_name').value,
+          last_name: document.getElementById('last_name').value,
+          birthday: document.getElementById('birthday').value
+        }
+        /* [
+          document.getElementById('user_icon').value,
+          document.getElementById('nickname').value,
+          document.getElementById('first_name').value,
+          document.getElementById('last_name').value,
+          document.getElementById('birthday').value
+        ]
+        if (newInfo.some(element => element === '')) {
+          this.error = 'Please fill in all fields!'
+          return
+        } */
+        if (!Object.keys(newInfo).every(key => newInfo[key])) {
           this.error = 'Please fill in all fields!'
           return
         }
         this.error = null
-        const { token, ...userInfo } = this.userInformation
+        const { token, id } = this.userInformation
         await UpdateInfo.updateProfile({
-          data: { ...userInfo },
+          data: newInfo,
           token: token
         })
-        this.setUser(this.userInformation)
+        this.setUser({
+          id: id,
+          token: token,
+          ...newInfo
+        })
         this.isUpdated = true
         this.hasUpdates = true
       } catch (error) {

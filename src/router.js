@@ -9,10 +9,10 @@ import ChangePw from '@/views/ChangePw'
 import SearchFriend from '@/views/SearchFriend'
 import AddPost from '@/views/AddPost'
 import Friend from '@/views/Friend'
-
+import store from './store'
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes: [
@@ -63,3 +63,10 @@ export default new Router({
     }
   ]
 })
+router.beforeEach((to, from, next) => {
+  const user = store.getters.getUser
+  const allowedEndPoint = ['home', 'login', 'register']
+  if (!allowedEndPoint.includes(to.name) && !user.id) return next('login')
+  next()
+})
+export default router

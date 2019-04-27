@@ -28,7 +28,10 @@
         <input type="password" v-model="password" class="form-control" placeholder="Password">
         <small style="color:red">{{error}}</small>
       </div>
-      <button type="button" @click="login" class="btn btn-dark btn-lg">Log in</button>
+      <div class="row ml-1">
+        <button type="button" @click="login" class="btn btn-dark btn-lg col-1">Log in</button>
+        <button type="button" @click="fbLogin" class="btn btn-dark btn-lg offset-1">Log in with Facebook</button>
+      </div>
     </form>
   </div>
 </template>
@@ -36,6 +39,7 @@
 <script>
 import Header from '@/components/Header'
 import AuthenticationService from '@/services/AuthenticationService'
+import * as fb from '@/services/FacebookLogin'
 export default {
   name: 'login',
   components: {
@@ -69,6 +73,10 @@ export default {
       } catch (error) {
         this.error = error.response.data.error
       }
+    },
+    async fbLogin () {
+      const data = await fb.FbLogin()
+      console.log(data)
     }
   }
 }

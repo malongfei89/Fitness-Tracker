@@ -7,13 +7,11 @@ const CustomError = require('../models/CustomError')
 
 //search a user by username
 app.get('/searchFriend', (req, res, next) => {
-  console.log(req.query)
-  user.findUserById(req.query.id)
+  user.getUserInfo(req.query.id)
   .then(data => {
     if (!data[0]) throw new CustomError('There is no such user in our system!', 404)
     else {
       const { created_at, last_update, username, password, ...result} = data[0]
-      console.log(result)
       res.send(result)
     }
   })
@@ -24,8 +22,37 @@ app.post('/searchFriend', (req, res, next) => {
   .then(() => res.sendStatus(200))
   .catch(next)
 })
-app.delete('/removefriend', (req, res) => {
-  user.removeFriend(req.body)
+app.get('/friend/:id', (req, res, next) => {
+  user.getUserInfo(req.params.id)
+  .then(result => {
+    const data = []
+    data[0] = result
+    user.getUserRecords(req.params.id)
+    .then(result => {
+      data[1] = result
+      user.getUserRecordsCT(req.params.id)
+      .then(result => {
+        data[2] = result
+        res.send(data)
+      })
+    })
+  })
+  .catch(next)
+})
+app.patch('/friend/:id', (req, res, next) => {
+  user.deleteUserRecordsCT(req.body)
+  .then(() => res.sendStatus(200))
+  .catch(next)
+})
+app.post('/friend/:id', (req, res, next) => {
+  user.addUserRecordsCT(req.body)
+  .then(() => res.sendStatus(200))
+  .catch(next)
+})
+app.delete('/user/:id', (req, res, next) => {
+  user.removeFriend({
+    frie_id: req.query.id,
+    user_id: req.params.id})
   .then(() => res.sendStatus(200))
   .catch(next)
 })
@@ -36,7 +63,7 @@ app.get('/user/:id', (req, res, next) => {
   .catch(next)
 })
 //update user profile
-app.patch('/myProfile', (req, res, next) => {
+app.post('/myProfile', (req, res, next) => {
   user.updateUser(req.body)
   .then(() => res.sendStatus(200))
   .catch(next)
@@ -88,8 +115,7 @@ app.get('/addPost', (req, res, next) => {
   .catch(next)
 })
 app.post('/addPost', (req, res, next) => {
-  console.log(req.body)
-  user.addPost(req.body)
+  user.addrecords(req.body)
   .then(() => res.sendStatus(200))
   .catch(next)
 })
