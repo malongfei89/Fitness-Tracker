@@ -44,7 +44,7 @@ import Header from '@/components/Header'
 import { mapGetters } from 'vuex'
 import GetInfo from '@/services/GetInfo'
 import UpdateInfo from '@/services/UpdateInfo'
-
+import toastr from 'toastr'
 export default {
   data () {
     return {
@@ -71,7 +71,7 @@ export default {
     ...mapGetters(['getUser']),
     async searchFriend () {
       if (this.targetId === '' || parseInt(this.targetId) === this.user.id) {
-        this.error = "FitnessID can't be empty or your FitnessID!"
+        toastr.error("FitnessID can't be empty or your FitnessID!") || (this.error = "FitnessID can't be empty or your FitnessID!")
         return
       }
       try {
@@ -98,7 +98,7 @@ export default {
         })
         this.addFriendSucessfully = true
       } catch (error) {
-        this.error = error.response.data.error
+        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }
     }
   }

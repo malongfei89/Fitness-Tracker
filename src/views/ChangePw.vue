@@ -28,7 +28,7 @@
 import Header from '@/components/Header'
 import { mapGetters } from 'vuex'
 import UpdateInfo from '@/services/UpdateInfo'
-
+import toastr from 'toastr'
 export default {
   name: 'changePw',
   data () {
@@ -53,7 +53,7 @@ export default {
       const newPassword1 = document.getElementById('newPassword').value
       const newPassword2 = document.getElementById('cnewPassword').value
       if (!oldPassword || !newPassword1 || !newPassword2) {
-        this.error = 'All fields are required'
+        toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
         return
       }
       if (newPassword1 !== newPassword2) {
@@ -71,7 +71,7 @@ export default {
         })
         this.isPasswordChanged = true
       } catch (error) {
-        this.error = error.response.data.error
+        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }
     }
   }

@@ -47,7 +47,7 @@ import Header from '@/components/Header'
 import { mapGetters } from 'vuex'
 import GetInfo from '../services/GetInfo'
 import UpdateInfo from '../services/UpdateInfo'
-
+import toastr from 'toastr'
 export default {
   data: () => {
     return {
@@ -72,7 +72,7 @@ export default {
     ...mapGetters(['getUser']),
     addNewPost () {
       if (!Object.keys(this.newPost).every(key => !!this.newPost[key])) {
-        this.error = 'Please fill in all fields!'
+        toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
         return
       }
       this.error = ''

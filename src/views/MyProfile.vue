@@ -63,7 +63,7 @@
 import Header from '@/components/Header'
 import { mapActions, mapGetters } from 'vuex'
 import UpdateInfo from '@/services/UpdateInfo'
-
+import toastr from 'toastr'
 export default {
   name: 'myProfile',
   data () {
@@ -138,7 +138,7 @@ export default {
           return
         } */
         if (!Object.keys(newInfo).every(key => newInfo[key])) {
-          this.error = 'Please fill in all fields!'
+          toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
           return
         }
         this.error = null
@@ -155,7 +155,7 @@ export default {
         this.isUpdated = true
         this.hasUpdates = true
       } catch (error) {
-        this.error = error.response.data.error
+        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }
     }
   }

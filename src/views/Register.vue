@@ -46,6 +46,7 @@
 <script>
 import AuthenticationService from '../services/AuthenticationService'
 import Header from '@/components/Header'
+import toastr from 'toastr'
 export default {
   name: 'register',
   data () {
@@ -63,6 +64,10 @@ export default {
   methods: {
     async register () {
       this.error = null
+      if (!this.email || !this.password) {
+        toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
+        return
+      }
       try {
         const data = await AuthenticationService.register({
           username: this.email,
@@ -70,7 +75,7 @@ export default {
         })
         this.id = data.data.insertId
       } catch (error) {
-        this.error = error.response.data.error
+        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       } finally {
         if (this.error === null) this.registerSucceeded = true
       }

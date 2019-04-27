@@ -40,6 +40,7 @@
 import Header from '@/components/Header'
 import AuthenticationService from '@/services/AuthenticationService'
 import * as fb from '@/services/FacebookLogin'
+import toastr from 'toastr'
 export default {
   name: 'login',
   components: {
@@ -71,7 +72,7 @@ export default {
         })
         this.$router.push({ name: 'user', params: { id: response.data.id } })
       } catch (error) {
-        this.error = error.response.data.error
+        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }
     },
     async fbLogin () {
