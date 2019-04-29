@@ -41,6 +41,7 @@ import Header from '@/components/Header'
 import AuthenticationService from '@/services/AuthenticationService'
 import * as fb from '@/services/FacebookLogin'
 import toastr from 'toastr'
+// import { mapGetters } from 'vuex'
 export default {
   name: 'login',
   components: {
@@ -70,7 +71,12 @@ export default {
           birthday: response.data.birthday,
           user_icon: response.data.user_icon
         })
-        this.$router.push({ name: 'user', params: { id: response.data.id } })
+        const redirectRoute = this.$store.getters.getRedirectRoute
+        if (redirectRoute.name) {
+          if (redirectRoute.id === response.data.id) {
+            this.$router.push({ name: redirectRoute.name, params: { id: redirectRoute.id } })
+          } else this.$router.push({ name: 'user', params: { id: response.data.id } })
+        } else this.$router.push({ name: 'user', params: { id: response.data.id } })
       } catch (error) {
         toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }

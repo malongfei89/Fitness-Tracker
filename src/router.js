@@ -64,9 +64,15 @@ const router = new Router({
   ]
 })
 router.beforeEach((to, from, next) => {
-  const user = store.getters.getUser
+  const user = store.state.user
   const allowedEndPoint = ['home', 'login', 'register']
-  if (!allowedEndPoint.includes(to.name) && !user.id) return next('login')
+  if (!allowedEndPoint.includes(to.name) && !user.id) {
+    store.commit('setRedirectRoute', {
+      name: to.name,
+      id: to.params.id
+    })
+    return next('login')
+  }
   next()
 })
 export default router

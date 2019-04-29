@@ -111,6 +111,10 @@ export default {
         birthday: null,
         user_icon: ''
       })
+      this.$store.commit('setRedirectRoute', {
+        name: null,
+        id: null
+      })
       this.$router.push('/')
     },
     needUpdate () {

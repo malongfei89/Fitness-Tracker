@@ -15,10 +15,15 @@ export default new Vuex.Store({
       nickname: '',
       birthday: '',
       user_icon: ''
+    },
+    redirectRoute: {
+      name: null,
+      id: null
     }
   },
   getters: {
-    getUser: state => state.user
+    getUser: state => state.user,
+    getRedirectRoute: state => state.redirectRoute
   },
   mutations: {
     setUser (state, user) {
@@ -29,11 +34,18 @@ export default new Vuex.Store({
       state.user.user_icon = user.user_icon
       state.user.nickname = user.nickname
       state.user.birthday = user.birthday
+    },
+    setRedirectRoute (state, toRoute) {
+      state.redirectRoute.name = toRoute.name
+      state.redirectRoute.id = toRoute.id
     }
   },
   actions: {
     setUser ({ commit }, user) {
       commit('setUser', user)
+    },
+    setRedirectRoute ({ commit }, toRoute) {
+      commit('setRedirectRoute', toRoute)
     }
   }
 })
