@@ -8,7 +8,7 @@
     </Header>
     <div v-if="!findUserSucessfully" class="form-group container mt-4">
       <label for="id">Please enter FitnessID:</label>
-      <v-select type="number" @input="searchFriend" :options="returnedUserInfoId" id="vSelectId"></v-select>
+      <v-select type="number" v-model="targetId" @search="searchFriend" :options="returnedUserInfoId"></v-select>
       <small style="color:red">{{error}}</small>
       <div class="mt-4">
         <button class="btn btn-dark btn-lg" @click="friendProfile">Search</button>
@@ -17,17 +17,17 @@
     </div>
     <div v-else-if="!addFriendSucessfully" class="form-group container mt-4">
       <label for="id">FitnessID</label>
-      <input readonly type="number" class="form-control" id="id" :value="returnedUserInfo.id">
+      <input readonly type="number" class="form-control" id="id" :value="target.id">
       <br>
       <label for="user_icon">User_icon</label>
-      <i :class="this.returnedUserInfo.user_icon" id="user_icon"></i>
+      <i :class="target.user_icon" id="user_icon"></i>
       <br>
       <label for="nickname">Nickname</label>
-      <input readonly type="text" class="form-control" id="nickname" :value="returnedUserInfo.nickname">
+      <input readonly type="text" class="form-control" id="nickname" :value="target.nickname">
       <label for="name">Name</label>
-      <input readonly type="text" class="form-control" id="name" :value="`${returnedUserInfo.first_name} ${returnedUserInfo.last_name}`">
+      <input readonly type="text" class="form-control" id="name" :value="`${target.first_name} ${target.last_name}`">
       <label for="birthday">Birthday</label>
-      <input readonly type="date" class="form-control" id="birthday" :value="getRightDate">
+      <input readonly type="date" class="form-control" id="birthday" :value="getRightDate2">
       <small style="color:red">{{error}}</small>
       <br>
       <button class="btn btn-dark btn-lg mt-5" @click="addFriend">Add</button>
@@ -48,6 +48,7 @@ import toastr from 'toastr'
 export default {
   data () {
     return {
+      target: {},
       targetId: '',
       user: {},
       error: '',
@@ -61,6 +62,10 @@ export default {
     getRightDate: function () {
       if (this.returnedUserInfo.birthday == null) return
       return this.returnedUserInfo.birthday.split('T')[0]
+    },
+    getRightDate2: function () {
+      if (this.target.birthday == null) return
+      return this.target.birthday.split('T')[0]
     }
   },
   mounted () {
@@ -87,20 +92,24 @@ export default {
         this.error = error.response.data.error
       }
     }, */
-    async searchFriend () {
-      try {
-        this.error = ''
-        this.targetId = document.getElementById('vSelectId').value
-        this.returnedUserInfo = (await GetInfo.getUserInfo({
-          id: parseInt(this.targetId),
-          token: this.user.token
-        })).data
-        this.returnedUserInfoId = this.returnedUserInfo.map(user => parseInt(user.id))
-      } catch (error) {
-        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+    async searchFriend (search) {
+      if (search !== '') {
+        try {
+          this.error = ''
+          this.returnedUserInfo = (await GetInfo.getUserInfo({
+            id: parseInt(search),
+            token: this.user.token
+          })).data
+          console.log(this.returnedUserInfo)
+          this.returnedUserInfoId = this.returnedUserInfo.map(user => parseInt(user.id))
+        } catch (error) {
+          toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+        }
       }
     },
     friendProfile () {
+      this.target = this.returnedUserInfo.filter(user => user.id === this.targetId)[0]
+      console.log(this.target)
       this.$router.push({ name: 'searchFriend', query: { id: this.targetId } })
       this.findUserSucessfully = true
     },
