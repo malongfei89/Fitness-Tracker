@@ -8,10 +8,10 @@
     </Header>
     <div v-if="!findUserSucessfully" class="form-group container mt-4">
       <label for="id">Please enter FitnessID:</label>
-      <input type="number" v-model="targetId" class="form-control" id="id">
+      <v-select type="number" @input="searchFriend" :options="returnedUserInfoId" id="vSelectId"></v-select>
       <small style="color:red">{{error}}</small>
       <div class="mt-4">
-        <button class="btn btn-dark btn-lg" @click="searchFriend">Search</button>
+        <button class="btn btn-dark btn-lg" @click="friendProfile">Search</button>
         <router-link class="btn btn-dark btn-lg ml-5" :to="`/user/${user.id}`">Cancle</router-link>
       </div>
     </div>
@@ -52,7 +52,8 @@ export default {
       user: {},
       error: '',
       findUserSucessfully: false,
-      returnedUserInfo: {},
+      returnedUserInfo: [],
+      returnedUserInfoId: [],
       addFriendSucessfully: false
     }
   },
@@ -69,7 +70,7 @@ export default {
   components: { Header },
   methods: {
     ...mapGetters(['getUser']),
-    async searchFriend () {
+    /* async searchFriend () {
       if (this.targetId === '' || parseInt(this.targetId) === this.user.id) {
         toastr.error("FitnessID can't be empty or your FitnessID!") || (this.error = "FitnessID can't be empty or your FitnessID!")
         return
@@ -85,6 +86,23 @@ export default {
       } catch (error) {
         this.error = error.response.data.error
       }
+    }, */
+    async searchFriend () {
+      try {
+        this.error = ''
+        this.targetId = document.getElementById('vSelectId').value
+        this.returnedUserInfo = (await GetInfo.getUserInfo({
+          id: parseInt(this.targetId),
+          token: this.user.token
+        })).data
+        this.returnedUserInfoId = this.returnedUserInfo.map(user => parseInt(user.id))
+      } catch (error) {
+        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+      }
+    },
+    friendProfile () {
+      this.$router.push({ name: 'searchFriend', query: { id: this.targetId } })
+      this.findUserSucessfully = true
     },
     async addFriend () {
       try {

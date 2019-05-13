@@ -6,13 +6,28 @@ const bcrypt = require('bcrypt')
 const CustomError = require('../models/CustomError')
 
 //search a user by username
-app.get('/searchFriend', (req, res, next) => {
+/* app.get('/searchFriend', (req, res, next) => {
   user.getUserInfo(req.query.id)
   .then(data => {
     if (!data[0]) throw new CustomError('There is no such user in our system!', 404)
     else {
-      const { created_at, last_update, username, password, ...result} = data[0]
+      const { created_at, last_update, username, password, ...result } = data[0]
       res.send(result)
+    }
+  })
+  .catch(next)
+}) */
+app.get('/searchFriend', (req, res, next) => {
+  console.log(req.query.id)
+  user.getUserInfo2(req.query.id)
+  .then(data => {
+    if (!data.length) throw new CustomError('There is no such user in our system!', 404)
+    else {
+      let results = data.map(user => {
+        const { created_at, last_update, username, password, ...result } = user
+        return result
+      })
+      res.send(results)
     }
   })
   .catch(next)

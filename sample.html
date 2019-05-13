@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<head></head>
+<body>
+    <h1 style="text-align:center">Clock</h1>
+    <div class="clock_body">
+      <canvas id="indicator" class="indicator"></canvas>
+      <div class="clock_hand" style="width:75px; height: 4px;">
+
+      </div>
+    
+      <div class="clock_hand" style="width:100px; height: 2px;">
+
+      </div>
+      <div class="clock_hand" style="width:55px; height: 7px;">
+
+      </div>
+    </div>
+</body>
+<script>
+  const canvas = document.getElementById('canvas')
+  const ctx = canvas.getContext('2d')
+</script>
+<style>
+  .clock_body {
+    text-align: center;
+    height:270px;
+    width:270px;
+    border: 1px solid black;
+    border-radius: 50%;
+    position: absolute;
+    left:40%;
+  }
+  .indicator {
+    position: absolute
+  }
+  .clock_hand {
+    position:relative;
+    top:50%;
+    left: 50%;
+    background-color:black;
+  }
+</style>
