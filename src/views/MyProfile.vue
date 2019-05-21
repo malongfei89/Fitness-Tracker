@@ -123,7 +123,9 @@ export default {
     },
     async updateProfile () {
       try {
+        const { token, id } = this.userInformation
         const newInfo = {
+          id: id,
           user_icon: document.getElementById('user_icon').value,
           nickname: document.getElementById('nickname').value,
           first_name: document.getElementById('first_name').value,
@@ -146,7 +148,6 @@ export default {
           return
         }
         this.error = null
-        const { token, id } = this.userInformation
         await UpdateInfo.updateProfile({
           data: newInfo,
           token: token

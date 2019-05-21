@@ -22,8 +22,8 @@ module.exports= {
   },
   //get thumb-up and comments related to post
   getUserRecordsCT(id) {
-    return conn.query(`select thumbup_user_id, records_id from thumbup_to_records where records_id = any(select records.id from records where user_id = ?);
-      select comment_user_id, comment_user_firstname, comment_text, records_id from comments_to_records where records_id = any(select records.id from records where user_id = ?);`,
+    return conn.query(`select id, thumbup_user_id, records_id from thumbup_to_records where records_id = any(select records.id from records where user_id = ?);
+      select comments_to_records.id, first_name, comment_user_id, comment_text, records_id from comments_to_records join users on comment_user_id = users.id where records_id = any(select records.id from records where user_id = ?);`,
       [id, id])
   },
   addUserRecordsCT(input) {
@@ -31,14 +31,14 @@ module.exports= {
       return conn.query('insert into thumbup_to_records (created_at, records_id, thumbup_user_id) value(?)',
       [[new Date(), input.records_id, input.user_id]])
     if (input.type === 'comment')
-      return conn.query('insert into comments_to_records (created_at, records_id, comment_user_id, comment_text, comment_user_firstname) value(?)',
-      [[new Date(), input.records_id, input.comment_user_id, input.comment_text, input.comment_user_firstname]])
+      return conn.query('insert into comments_to_records (created_at, records_id, comment_user_id, comment_text) value(?)',
+      [[new Date(), input.records_id, input.comment_user_id, input.comment_text]])
   },
   deleteUserRecordsCT(input) {
     if (input.type === 'thumbUp')
-      return conn.query(`delete from thumbup_to_records where records_id = ? and thumbup_user_id = ?;`, [input.targetRecord, input.targetUser])
+      return conn.query(`delete from thumbup_to_records where id=?;`, [input.id])
     if (input.type === 'comment') 
-      return conn.query(`delete from comments_to_records where records_id = ? and comment_user_id = ?;`, [input.targetRecord, input.targetUser])
+      return conn.query(`delete from comments_to_records where id = ?;`, [input.id])
   },
   //after login in, grab information about the user
   getInfo(id) {

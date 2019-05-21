@@ -61,7 +61,7 @@ app.patch('/friend/:id', (req, res, next) => {
 })
 app.post('/friend/:id', (req, res, next) => {
   user.addUserRecordsCT(req.body)
-  .then(() => res.sendStatus(200))
+  .then((data) => res.send({id: data.insertId}))
   .catch(next)
 })
 app.delete('/user/:id', (req, res, next) => {

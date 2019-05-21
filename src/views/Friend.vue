@@ -24,7 +24,7 @@
             <div class="col-2 offset-1">
               <button class=" btn btn-link" @click="changeThumbUp(record)">
                 <span >
-                <i :class="`${record.thumbUpIcon}`"> {{record.rightThumbUp.length}}</i>
+                <i :class="[record.thumbUpIcon]"> {{record.rightThumbUp.length}}</i>
                 </span>
               </button>
             </div>
@@ -42,8 +42,15 @@
                   <small>press Enter to post.</small>
                 </div>
               </div>
-              <div class="ml-5" v-for="comment of record.rightComment" :key="comment.id">
-                {{comment.comment_user_firstname}}: {{comment.comment_text}}
+              <div class="ml-5">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item" v-for="(comment, index2) of record.rightComment" :key="index2">
+                    {{comment.first_name}}: {{comment.comment_text}}
+                    <button class="btn ml-2" v-if="comment.first_name == user.first_name" @click="deleteComment(record, index2)">
+                     <i class="fas fa-trash-alt fa-sm"/>
+                    </button>
+                  </li>
+                </ul>
               </div>
             </div>
         </li>
@@ -131,7 +138,7 @@ export default {
       record.hasThumbUp = !record.hasThumbUp
       const userId = this.user.id
       if (record.hasThumbUp) {
-        await UpdateInfo.addRecordCT({
+        let returnedId = (await UpdateInfo.addRecordCT({
           id: this.friendProfile.id,
           data: {
             type: 'thumbUp',
@@ -139,8 +146,9 @@ export default {
             user_id: userId
           },
           token: this.user.token
-        })
+        })).id
         record.rightThumbUp.push({
+          id: returnedId,
           thumbup_user_id: userId,
           records_id: record.id
         })
@@ -149,12 +157,11 @@ export default {
         let index = record.rightThumbUp.findIndex(thumbUp => thumbUp.thumbup_user_id === userId)
         await UpdateInfo.deleteRecordCT({
           id: this.friendProfile.id,
+          token: this.user.token,
           CTId: {
-            type: 'thumbUp',
-            targetRecord: record.rightThumbUp[index].records_id,
-            targetUser: record.rightThumbUp[index].thumbup_user_id
-          },
-          token: this.user.token
+            id: record.rightThumbUp[index].id,
+            type: 'thumbUp'
+          }
         })
         record.thumbUpIcon = 'far fa-thumbs-up'
         record.rightThumbUp.splice(index, 1)
@@ -170,32 +177,46 @@ export default {
     async postNewComment (record, index) {
       record.newComment = record.newComment.trim()
       if (record.newComment !== '') {
-        await UpdateInfo.addRecordCT({
+        let returnedId = (await UpdateInfo.addRecordCT({
           data: {
             type: 'comment',
             records_id: record.id,
             comment_user_id: this.user.id,
-            comment_text: record.newComment,
-            comment_user_firstname: this.user.first_name
+            comment_text: record.newComment
           },
           token: this.user.token
-        })
+        })).id
         record.rightComment.push({
+          id: returnedId,
           comment_text: record.newComment,
-          comment_user_firstname: this.user.first_name,
+          first_name: this.user.first_name,
           comment_user_id: this.user.id,
           records_id: record.id
         })
         record.newComment = ''
         document.getElementsByTagName('textarea')[index].setAttribute('style', 'height:40px;resize:none;')
       }
-    }
+    },
     /* goToNewLine (record, index) {
       record.newComment += '\n'
       let currentEl = document.getElementsByTagName('textarea')[index]
       currentEl.style.height = 'auto'
       currentEl.style.height = currentEl.scrollHeight + 'px'
     } */
+    async deleteComment (record, index) {
+      try {
+        await UpdateInfo.deleteRecordCT({
+          id: this.friendProfile.id,
+          token: this.user.token,
+          CTId: {
+            id: record.rightComment[index].id,
+            type: 'comment'
+          }
+        })
+        record.rightComment.splice(index, 1)
+      } catch (error) {
+      }
+    }
   }
 }
 </script>
