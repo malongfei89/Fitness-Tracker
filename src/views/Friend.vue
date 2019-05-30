@@ -24,7 +24,7 @@
             <div class="col-2 offset-1">
               <button class=" btn btn-link" @click="changeThumbUp(record)">
                 <span >
-                <i :class="[record.thumbUpIcon]"> {{record.rightThumbUp.length}}</i>
+                <i :class="[record.thumbUpIcon]"> {{record.thumbUps.length}}</i>
                 </span>
               </button>
             </div>
@@ -42,15 +42,17 @@
                   <small>press Enter to post.</small>
                 </div>
               </div>
-              <div class="ml-5">
-                <ul class="list-group list-group-flush">
-                  <li class="list-group-item" v-for="(comment, index2) of record.rightComment" :key="index2">
+              <div class="ml-5 row align-items-center">
+                <ul class="col list-group list-group-flush">
+                  <li class="list-group-item" v-for="(comment, index2) of record.comments" :key="index2">
                     {{comment.first_name}}: {{comment.comment_text}}
                     <button class="btn ml-2" v-if="comment.first_name == user.first_name" @click="deleteComment(record, index2)">
                      <i class="fas fa-trash-alt fa-sm"/>
                     </button>
                   </li>
                 </ul>
+                <div class="w-100"></div>
+                <button v-if="record.comments.length < record.numOfComments" class="col btn btn-link text-center" @click="getMoreComments(record, record.comments.length)">more comments</button>
               </div>
             </div>
         </li>
@@ -77,7 +79,6 @@
 </template>
 
 <script>
-import Header from '@/components/Header'
 import { mapGetters } from 'vuex'
 import GetInfo from '../services/GetInfo'
 import UpdateInfo from '../services/UpdateInfo'
@@ -101,33 +102,35 @@ export default {
   async beforeMount () {
     const alias = this
     this.user = this.getUser()
-    const friendInfo = (await GetInfo.getFriendInfo({
-      id: parseInt(this.$route.params.id),
-      token: this.user.token
-    })).data
-    this.friendProfile = friendInfo[0][0]
-    this.friendRecord = friendInfo[1]
-    this.friendRecord.forEach(function (record) {
-      alias.$set(record, 'rightComment', friendInfo[2][1].filter(comment => comment.records_id === record.id))
-      alias.$set(record, 'rightThumbUp', friendInfo[2][0].filter(thumbUp => thumbUp.records_id === record.id))
-      alias.$set(record, 'showComment', false)
-      alias.$set(record, 'newComment', '')
-      if (record.rightThumbUp.find(thumbUp => thumbUp.thumbup_user_id === alias.user.id)) {
-        // two different ways to add new properties to an object
-        Object.defineProperties(record, {
-          'hasThumbUp': { value: true, writable: true, enumerable: true },
-          'thumbUpIcon': { value: 'fas fa-thumbs-up', writable: true, enumerable: true }
-        })
-        // alias.$set(record, 'hasThumbUp', true)
-        // alias.$set(record, )
-      } else {
-        alias.$set(record, 'hasThumbUp', false)
-        alias.$set(record, 'thumbUpIcon', 'far fa-thumbs-up')
-      }
-    })
-  },
-  components: {
-    Header
+    try {
+      const friendInfo = (await GetInfo.getFriendInfo({
+        id: parseInt(this.$route.params.id),
+        token: this.user.token
+      })).data
+      this.friendProfile = friendInfo[0][0]
+      this.friendRecord = friendInfo[1]
+      this.friendRecord.forEach(function (record, index) {
+        alias.$set(record, 'comments', friendInfo[2][index].comments)
+        alias.$set(record, 'numOfComments', friendInfo[2][index].numOfComments)
+        alias.$set(record, 'thumbUps', friendInfo[2][index].thumbUps)
+        alias.$set(record, 'showComment', false)
+        alias.$set(record, 'newComment', '')
+        if (record.thumbUps.find(thumbUp => thumbUp.thumbup_user_id === alias.user.id)) {
+          // two different ways to add new properties to an object
+          Object.defineProperties(record, {
+            'hasThumbUp': { value: true, writable: true, enumerable: true },
+            'thumbUpIcon': { value: 'fas fa-thumbs-up', writable: true, enumerable: true }
+          })
+          // alias.$set(record, 'hasThumbUp', true)
+          // alias.$set(record, )
+        } else {
+          alias.$set(record, 'hasThumbUp', false)
+          alias.$set(record, 'thumbUpIcon', 'far fa-thumbs-up')
+        }
+      })
+    } catch (error) {
+      this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+    }
   },
   methods: {
     ...mapGetters(['getUser']),
@@ -138,33 +141,41 @@ export default {
       record.hasThumbUp = !record.hasThumbUp
       const userId = this.user.id
       if (record.hasThumbUp) {
-        let returnedId = (await UpdateInfo.addRecordCT({
-          id: this.friendProfile.id,
-          data: {
-            type: 'thumbUp',
-            records_id: record.id,
-            user_id: userId
-          },
-          token: this.user.token
-        })).id
-        record.rightThumbUp.push({
-          id: returnedId,
-          thumbup_user_id: userId,
-          records_id: record.id
-        })
-        record.thumbUpIcon = 'fas fa-thumbs-up'
+        try {
+          let returnedId = (await UpdateInfo.addRecordCT({
+            id: this.friendProfile.id,
+            data: {
+              type: 'thumbUp',
+              records_id: record.id,
+              user_id: userId
+            },
+            token: this.user.token
+          })).id
+          record.thumbUps.push({
+            id: returnedId,
+            thumbup_user_id: userId,
+            records_id: record.id
+          })
+          record.thumbUpIcon = 'fas fa-thumbs-up'
+        } catch (error) {
+          this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+        }
       } else {
-        let index = record.rightThumbUp.findIndex(thumbUp => thumbUp.thumbup_user_id === userId)
-        await UpdateInfo.deleteRecordCT({
-          id: this.friendProfile.id,
-          token: this.user.token,
-          CTId: {
-            id: record.rightThumbUp[index].id,
-            type: 'thumbUp'
-          }
-        })
-        record.thumbUpIcon = 'far fa-thumbs-up'
-        record.rightThumbUp.splice(index, 1)
+        let index = record.thumbUps.findIndex(thumbUp => thumbUp.thumbup_user_id === userId)
+        try {
+          await UpdateInfo.deleteRecordCT({
+            id: this.friendProfile.id,
+            token: this.user.token,
+            CTId: {
+              id: record.thumbUps[index].id,
+              type: 'thumbUp'
+            }
+          })
+          record.thumbUpIcon = 'far fa-thumbs-up'
+          record.thumbUps.splice(index, 1)
+        } catch (error) {
+          this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+        }
       }
     },
     updateHeight () {
@@ -177,7 +188,7 @@ export default {
     async postNewComment (record, index) {
       record.newComment = record.newComment.trim()
       if (record.newComment !== '') {
-        let returnedId = (await UpdateInfo.addRecordCT({
+        /* let returnedId = (await UpdateInfo.addRecordCT({
           data: {
             type: 'comment',
             records_id: record.id,
@@ -186,15 +197,29 @@ export default {
           },
           token: this.user.token
         })).id
-        record.rightComment.push({
+        record.comments.push({
           id: returnedId,
           comment_text: record.newComment,
           first_name: this.user.first_name,
           comment_user_id: this.user.id,
           records_id: record.id
-        })
-        record.newComment = ''
-        document.getElementsByTagName('textarea')[index].setAttribute('style', 'height:40px;resize:none;')
+        }) */
+        try {
+          await UpdateInfo.addRecordCT({
+            data: {
+              type: 'comment',
+              records_id: record.id,
+              comment_user_id: this.user.id,
+              comment_text: record.newComment
+            },
+            token: this.user.token
+          })
+          record.numOfComments++
+          record.newComment = ''
+          document.getElementsByTagName('textarea')[index].setAttribute('style', 'height:40px;resize:none;')
+        } catch (error) {
+          this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+        }
       }
     },
     /* goToNewLine (record, index) {
@@ -204,17 +229,36 @@ export default {
       currentEl.style.height = currentEl.scrollHeight + 'px'
     } */
     async deleteComment (record, index) {
+      if (confirm('Do you mean that you want to delete this comment?')) {
+        try {
+          await UpdateInfo.deleteRecordCT({
+            id: this.friendProfile.id,
+            token: this.user.token,
+            CTId: {
+              id: record.comments[index].id,
+              type: 'comment'
+            }
+          })
+          record.numOfComments--
+          record.comments.splice(index, 1)
+        } catch (error) {
+          this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+        }
+      }
+    },
+    async getMoreComments (record, start) {
       try {
-        await UpdateInfo.deleteRecordCT({
+        let moreComments = (await GetInfo.getFriendInfo({
           id: this.friendProfile.id,
           token: this.user.token,
-          CTId: {
-            id: record.rightComment[index].id,
-            type: 'comment'
+          recordInfo: {
+            id: record.id,
+            offset: start
           }
-        })
-        record.rightComment.splice(index, 1)
+        })).data
+        for (let comment of moreComments) record.comments.push(comment)
       } catch (error) {
+        this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
       }
     }
   }

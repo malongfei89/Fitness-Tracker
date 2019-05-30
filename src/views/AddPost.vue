@@ -6,7 +6,7 @@
       </template>
       <router-link class="btn btn-dark" to="/changePw">Change Password</router-link>
     </Header>
-    <div class="form-group container mt-4" v-if="!updateSucessfully">
+    <div class="form-group container mt-4">
       <label for="">What have you done?</label>
       <select class="custom-select" v-model="newPost.type">
           <option v-for="type in exerciseTypes" :key="type.id" :value="type">{{type.type}}</option>
@@ -30,24 +30,18 @@
           </div>
         </div>
       </div>
-      <small style="color:red">{{error}}</small>
       <div class="mt-4">
         <button class="btn btn-dark btn-lg" @click="addNewPost">Submit</button>
         <router-link class="btn btn-dark btn-lg ml-5" :to="`/user/${user.id}`">Cancle</router-link>
       </div>
     </div>
-    <div v-else class="text-center mt-4">
-      <h1>Congratulations! It's been added!</h1>
-    </div>
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header'
 import { mapGetters } from 'vuex'
 import GetInfo from '../services/GetInfo'
 import UpdateInfo from '../services/UpdateInfo'
-import toastr from 'toastr'
 export default {
   data: () => {
     return {
@@ -57,9 +51,7 @@ export default {
         amount: ''
       },
       user: {},
-      exerciseTypes: null,
-      error: '',
-      updateSucessfully: false
+      exerciseTypes: null
     }
   },
   async mounted () {
@@ -67,24 +59,28 @@ export default {
     this.exerciseTypes = (await GetInfo.getExerciseTypes(this.user.token)).data
   },
   name: 'addPost',
-  components: { Header },
   methods: {
     ...mapGetters(['getUser']),
-    addNewPost () {
+    async addNewPost () {
       if (!Object.keys(this.newPost).every(key => !!this.newPost[key])) {
-        toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
+        this.$store.dispatch('setInfo', { type: 'danger', message: 'Please fill in all fields' })
+        // toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
         return
       }
-      this.error = ''
-      UpdateInfo.addPost({
-        data: {
-          id: this.user.id,
-          exer_id: this.newPost.type.id,
-          amount: this.newPost.amount
-        },
-        token: this.user.token
-      })
-      this.updateSucessfully = true
+      try {
+        await UpdateInfo.addPost({
+          data: {
+            id: this.user.id,
+            exer_id: this.newPost.type.id,
+            amount: this.newPost.unit === 'time' ? this.newPost.amount + (this.newPost.amount > 1 ? ' hours' : ' hour') : this.newPost.amount + (this.newPost.amount > 1 ? ' sets' : ' set')
+          },
+          token: this.user.token
+        })
+        this.$store.dispatch('setInfo', { type: 'success', message: 'Congratulations! It\'s been added!' })
+        this.$router.push(`/user/${this.user.id}`)
+      } catch (error) {
+        this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+      }
     }
   }
 }

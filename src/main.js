@@ -5,9 +5,13 @@ import store from './store'
 import '@/assets/main.scss'
 import 'bootstrap/dist/js/bootstrap.bundle'
 import vSelect from 'vue-select'
+import ClearableInput from './components/ClearableInput'
+import Header from '@/components/Header'
 
 Vue.config.productionTip = false
 Vue.component('v-select', vSelect)
+Vue.component('ClearableInput', ClearableInput)
+Vue.component('Header', Header)
 
 new Vue({
   router,

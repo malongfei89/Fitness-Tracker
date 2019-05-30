@@ -32,14 +32,10 @@
       <input type="text" :value="userInformation.last_name" id="last_name" class="form-control">
       <label for="birthday">Birthday</label>
       <input type="date" :value="userInformation.birthday" id="birthday" class="form-control">
-      <div>
-        <small style="color:red">{{error}}</small>
-      </div>
       <button class="btn btn-dark btn-lg mt-2" type="button" @click="updateProfile">Submit</button>
       <router-link class="btn btn-dark btn-lg mt-2 ml-4" :to="`/user/${userInformation.id}`">Cancle</router-link>
     </div>
     <div v-else class="container form-group mt-4">
-      <h2 v-if="hasUpdates">Congratulations! You've successfully updated your profile!</h2>
       <h2 v-if="userInformation.nickname === null">Want your friend to know you more? Press the button on the top to edit your file</h2>
       <label class="mt-2">FitnessID:</label>
       <input type="text" :value="userInformation.id" readonly class="form-control" aria-describedby="helpId">
@@ -60,10 +56,8 @@
 </template>
 
 <script>
-import Header from '@/components/Header'
 import { mapActions, mapGetters } from 'vuex'
 import UpdateInfo from '@/services/UpdateInfo'
-import toastr from 'toastr'
 export default {
   name: 'myProfile',
   data () {
@@ -77,9 +71,7 @@ export default {
         birthday: '',
         user_icon: ''
       },
-      error: null,
-      isUpdated: true,
-      hasUpdates: false
+      isUpdated: true
     }
   },
   computed: {
@@ -90,9 +82,6 @@ export default {
   },
   async mounted () {
     this.userInformation = this.getUser()
-  },
-  components: {
-    Header
   },
   methods: {
     ...mapActions([
@@ -144,10 +133,9 @@ export default {
           return
         } */
         if (!Object.keys(newInfo).every(key => newInfo[key])) {
-          toastr.error('Please fill in all fields') || (this.error = 'Please fill in all fields')
+          this.$store.dispatch('setInfo', { type: 'danger', message: 'Please fill in all fields' })
           return
         }
-        this.error = null
         await UpdateInfo.updateProfile({
           data: newInfo,
           token: token
@@ -158,9 +146,9 @@ export default {
           ...newInfo
         })
         this.isUpdated = true
-        this.hasUpdates = true
+        this.$store.dispatch('setInfo', { type: 'success', message: 'Congratulations! You\'ve successfully updated your profile!' })
       } catch (error) {
-        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+        this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
       }
     }
   }

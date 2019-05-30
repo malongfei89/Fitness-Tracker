@@ -19,11 +19,16 @@ export default new Vuex.Store({
     redirectRoute: {
       name: null,
       id: null
+    },
+    info: {
+      type: null,
+      message: null
     }
   },
   getters: {
     getUser: state => state.user,
-    getRedirectRoute: state => state.redirectRoute
+    getRedirectRoute: state => state.redirectRoute,
+    getInfo: state => state.info
   },
   mutations: {
     setUser (state, user) {
@@ -38,6 +43,10 @@ export default new Vuex.Store({
     setRedirectRoute (state, toRoute) {
       state.redirectRoute.name = toRoute.name
       state.redirectRoute.id = toRoute.id
+    },
+    setInfo (state, info) {
+      state.info.type = info.type
+      state.info.message = info.message
     }
   },
   actions: {
@@ -46,6 +55,9 @@ export default new Vuex.Store({
     },
     setRedirectRoute ({ commit }, toRoute) {
       commit('setRedirectRoute', toRoute)
+    },
+    setInfo ({ commit }, info) {
+      commit('setInfo', info)
     }
   }
 })

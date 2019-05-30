@@ -73,8 +73,6 @@
 import { mapActions, mapGetters } from 'vuex'
 import GetInfo from '../services/GetInfo'
 import UpdateInfo from '../services/UpdateInfo'
-import Header from '@/components/Header'
-import toastr from 'toastr'
 import { calculateTime } from '@/services/Helper'
 export default {
   name: 'user',
@@ -85,11 +83,6 @@ export default {
       friends: [],
       activeStatus: []
     }
-  },
-  computed: {
-  },
-  components: {
-    Header
   },
   async mounted () {
     this.user = this.getUser()
@@ -125,9 +118,7 @@ export default {
       this.$router.push('/')
     },
     greetname () {
-      if (this.user.first_name === null) {
-        return 'user'
-      } else return this.user.first_name
+      return this.user.first_name || 'user'
     },
     displayTime (date) {
       return calculateTime(date)
@@ -150,7 +141,7 @@ export default {
           })
           this.friends.splice(index, 1)
         } catch (error) {
-          toastr.error(error.response.data.error)
+          this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
         }
       }
     }

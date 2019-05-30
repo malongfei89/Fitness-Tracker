@@ -18,7 +18,7 @@ const CustomError = require('../models/CustomError')
   .catch(next)
 }) */
 app.get('/searchFriend', (req, res, next) => {
-  console.log(req.query.id)
+  //console.log(req.query.id)
   user.getUserInfo2(req.query.id)
   .then(data => {
     if (!data.length) throw new CustomError('There is no such user in our system!', 404)
@@ -37,22 +37,20 @@ app.post('/searchFriend', (req, res, next) => {
   .then(() => res.sendStatus(200))
   .catch(next)
 })
-app.get('/friend/:id', (req, res, next) => {
-  user.getUserInfo(req.params.id)
-  .then(result => {
-    const data = []
-    data[0] = result
-    user.getUserRecords(req.params.id)
-    .then(result => {
-      data[1] = result
-      user.getUserRecordsCT(req.params.id)
-      .then(result => {
-        data[2] = result
-        res.send(data)
-      })
-    })
-  })
-  .catch(next)
+app.get('/friend/:id', async (req, res, next) => {
+  try {
+    console.log(req.query)
+    if (!req.query.id) {
+      let data=[]
+      data[0] = await user.getUserInfo(req.params.id)
+      data[1] = await user.getUserRecords(req.params.id)
+      data[2] = await user.getUserRecordsCT(req.params.id)
+      res.send(data)
+    } else {
+      let data = await user.getMoreComments(req.query.id, parseInt(req.query.offset))
+      res.send(data)
+    }
+  } catch(error) {next(error)}
 })
 app.patch('/friend/:id', (req, res, next) => {
   user.deleteUserRecordsCT(req.body)

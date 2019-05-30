@@ -10,6 +10,7 @@ import SearchFriend from '@/views/SearchFriend'
 import AddPost from '@/views/AddPost'
 import Friend from '@/views/Friend'
 import store from './store'
+
 Vue.use(Router)
 
 const router = new Router({
@@ -67,7 +68,7 @@ router.beforeEach((to, from, next) => {
   const user = store.state.user
   const allowedEndPoint = ['home', 'login', 'register']
   if (!allowedEndPoint.includes(to.name) && !user.id) {
-    store.commit('setRedirectRoute', {
+    store.dispatch('setRedirectRoute', {
       name: to.name,
       id: to.params.id
     })

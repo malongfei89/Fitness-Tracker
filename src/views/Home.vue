@@ -20,7 +20,6 @@
 
 <script>
 // @ is an alias to /src
-import Header from '@/components/Header'
 import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'home',
@@ -36,9 +35,6 @@ export default {
   },
   mounted () {
     this.user = this.getUser()
-  },
-  components: {
-    Header
   },
   methods: {
     ...mapActions([

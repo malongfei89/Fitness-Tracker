@@ -17,14 +17,28 @@ module.exports= {
   },
   //get friend posts
   getUserRecords(id) {
-    return conn.query('select records.id, records.created_at, type, amount from records join exercise on records.exer_id = exercise.id where user_id = ?;',
-      id)
+    return conn.query('select records.id, records.created_at, type, amount from records join exercise on records.exer_id = exercise.id where user_id = ?;', id)
   },
   //get thumb-up and comments related to post
-  getUserRecordsCT(id) {
-    return conn.query(`select id, thumbup_user_id, records_id from thumbup_to_records where records_id = any(select records.id from records where user_id = ?);
+  async getUserRecordsCT(id) {
+    /*return conn.query(`select id, thumbup_user_id, records_id from thumbup_to_records where records_id = any(select records.id from records where user_id = ?);
       select comments_to_records.id, first_name, comment_user_id, comment_text, records_id from comments_to_records join users on comment_user_id = users.id where records_id = any(select records.id from records where user_id = ?);`,
-      [id, id])
+      [id, id])*/
+    let finalResults = []
+    try {
+      const results = await conn.query('select id from records where user_id =?', id)
+      for(let index in results){
+        finalResults[index] ={}
+        finalResults[index].thumbUps = await conn.query('select id, thumbup_user_id from thumbup_to_records where records_id = ?', results[index].id)
+        finalResults[index].comments = await conn.query('select comments_to_records.id, first_name, comment_user_id, comment_text from comments_to_records join users on comment_user_id = users.id where records_id = ? limit 5', results[index].id)
+        finalResults[index].numOfComments = (await conn.query('select count(*) as total from comments_to_records where records_id = ?', results[index].id))[0].total
+      }
+      //console.log(finalResults)
+      return finalResults
+    } catch(error) {throw error}
+  },
+  getMoreComments(recordId, start){
+    return conn.query('select comments_to_records.id, first_name, comment_user_id, comment_text, records_id from comments_to_records join users on comment_user_id = users.id where records_id =? limit ?,5', [recordId, start])
   },
   addUserRecordsCT(input) {
     if (input.type === 'thumbUp')

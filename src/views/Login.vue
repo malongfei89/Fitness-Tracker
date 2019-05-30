@@ -11,13 +11,11 @@
     <form class="container mt-4">
       <div class="form-group form-group-lg">
         <label class="col-form-label-lg">Email address</label>
-        <input
+        <ClearableInput
           type="email"
           v-model="email"
-          class="form-control"
-          aria-describedby="emailHelp"
           placeholder="Enter email"
-        >
+          @resetValue="email = ''"/>
         <small
           id="emailHelp"
           class="form-text text-muted"
@@ -25,8 +23,11 @@
       </div>
       <div class="form-group form-group-lg">
         <label class="col-form-label-lg">Password</label>
-        <input type="password" v-model="password" class="form-control" placeholder="Password">
-        <small style="color:red">{{error}}</small>
+        <ClearableInput
+          type="password"
+          v-model="password"
+          placeholder="Password"
+          @resetValue="password = ''"/>
       </div>
       <div class="row ml-1">
         <button type="button" @click="login" class="btn btn-dark btn-lg col-1">Log in</button>
@@ -37,26 +38,20 @@
 </template>
 
 <script>
-import Header from '@/components/Header'
 import AuthenticationService from '@/services/AuthenticationService'
 import * as fb from '@/services/FacebookLogin'
-import toastr from 'toastr'
+// import toastr from 'toastr'
 // import { mapGetters } from 'vuex'
 export default {
   name: 'login',
-  components: {
-    Header
-  },
   data () {
     return {
       email: '',
-      password: '',
-      error: null
+      password: ''
     }
   },
   methods: {
     async login () {
-      this.error = null
       try {
         const response = await AuthenticationService.login({
           username: this.email,
@@ -78,7 +73,8 @@ export default {
           } else this.$router.push({ name: 'user', params: { id: response.data.id } })
         } else this.$router.push({ name: 'user', params: { id: response.data.id } })
       } catch (error) {
-        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+        this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
+        // toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }
     },
     async fbLogin () {

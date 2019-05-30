@@ -20,3 +20,5 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+sample.js
+sample.html

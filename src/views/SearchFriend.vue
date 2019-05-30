@@ -9,13 +9,12 @@
     <div v-if="!findUserSucessfully" class="form-group container mt-4">
       <label for="id">Please enter FitnessID:</label>
       <v-select type="number" v-model="targetId" @search="searchFriend" :options="returnedUserInfoId"></v-select>
-      <small style="color:red">{{error}}</small>
       <div class="mt-4">
         <button class="btn btn-dark btn-lg" @click="friendProfile">Search</button>
         <router-link class="btn btn-dark btn-lg ml-5" :to="`/user/${user.id}`">Cancle</router-link>
       </div>
     </div>
-    <div v-else-if="!addFriendSucessfully" class="form-group container mt-4">
+    <div v-else class="form-group container mt-4">
       <label for="id">FitnessID</label>
       <input readonly type="number" class="form-control" id="id" :value="target.id">
       <br>
@@ -33,29 +32,22 @@
       <button class="btn btn-dark btn-lg mt-5" @click="addFriend">Add</button>
       <router-link class="btn btn-dark btn-lg mt-5 ml-5" :to="`/user/${user.id}`">Cancle</router-link>
     </div>
-    <div v-else class="container text-center">
-      <h1>It's been added to your friend list successfully!</h1>
-    </div>
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header'
 import { mapGetters } from 'vuex'
 import GetInfo from '@/services/GetInfo'
 import UpdateInfo from '@/services/UpdateInfo'
-import toastr from 'toastr'
 export default {
   data () {
     return {
       target: {},
       targetId: '',
       user: {},
-      error: '',
       findUserSucessfully: false,
       returnedUserInfo: [],
-      returnedUserInfoId: [],
-      addFriendSucessfully: false
+      returnedUserInfoId: []
     }
   },
   computed: {
@@ -72,7 +64,6 @@ export default {
     this.user = this.getUser()
   },
   name: 'searchFriend',
-  components: { Header },
   methods: {
     ...mapGetters(['getUser']),
     /* async searchFriend () {
@@ -95,27 +86,23 @@ export default {
     async searchFriend (search) {
       if (search !== '') {
         try {
-          this.error = ''
           this.returnedUserInfo = (await GetInfo.getUserInfo({
             id: parseInt(search),
             token: this.user.token
           })).data
-          console.log(this.returnedUserInfo)
           this.returnedUserInfoId = this.returnedUserInfo.map(user => parseInt(user.id))
         } catch (error) {
-          toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+          this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
         }
       }
     },
     friendProfile () {
       this.target = this.returnedUserInfo.filter(user => user.id === this.targetId)[0]
-      console.log(this.target)
       this.$router.push({ name: 'searchFriend', query: { id: this.targetId } })
       this.findUserSucessfully = true
     },
     async addFriend () {
       try {
-        this.error = ''
         await UpdateInfo.addFriend({
           data: {
             user_id: this.user.id,
@@ -123,9 +110,10 @@ export default {
           },
           token: this.user.token
         })
-        this.addFriendSucessfully = true
+        this.$store.dispatch('setInfo', { type: 'danger', message: 'It\'s been added to your friend list successfully!' })
+        this.$router.push(`/user/${this.user.id}`)
       } catch (error) {
-        toastr.error(error.response.data.error) || (this.error = error.response.data.error)
+        this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
       }
     }
   }

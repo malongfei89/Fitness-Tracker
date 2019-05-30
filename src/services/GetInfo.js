@@ -11,6 +11,6 @@ export default {
     return Api().get(`/searchFriend`, { params: { id: credentials.id }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
   },
   getFriendInfo (credentials) {
-    return Api().get(`/friend/${credentials.id}`, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+    return credentials.recordInfo ? Api().get(`/friend/${credentials.id}`, { params: { ...credentials.recordInfo }, headers: { 'Authorization': 'Bearer ' + credentials.token } }) : Api().get(`/friend/${credentials.id}`, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
   }
 }
