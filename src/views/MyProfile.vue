@@ -2,13 +2,12 @@
   <div>
     <Header>
       <template #customized1>
-        <router-link class="nav-link" active-class="active" :to="`/user/${userInformation.id}`">My Page</router-link>
+        <router-link class="nav-link" :to="`/user/${userInformation.id}`">My Page</router-link>
       </template>
       <template #customized2>
         <button class="btn btn-dark" @click="needUpdate">Edit Profile</button>
       </template>
       <router-link class="btn btn-dark" to="/changePw">Change Password</router-link>
-      <button type="button" class="btn btn-dark" @click="logout">Log out</button>
     </Header>
     <div v-if="!isUpdated" class="container form-group mt-4">
       <h2>Please tell your friends more about you!</h2>
@@ -80,7 +79,7 @@ export default {
       return this.userInformation.birthday.split('T')[0]
     }
   },
-  async mounted () {
+  mounted () {
     this.userInformation = this.getUser()
   },
   methods: {
@@ -90,22 +89,6 @@ export default {
     ...mapGetters([
       'getUser'
     ]),
-    logout () {
-      this.setUser({
-        token: null,
-        id: null,
-        first_name: '',
-        last_name: '',
-        nickname: '',
-        birthday: null,
-        user_icon: ''
-      })
-      this.$store.commit('setRedirectRoute', {
-        name: null,
-        id: null
-      })
-      this.$router.push('/')
-    },
     needUpdate () {
       this.isUpdated = false
       this.userInformation.birthday = this.getRightDate

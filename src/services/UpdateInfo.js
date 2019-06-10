@@ -10,9 +10,6 @@ export default {
   addPost (credentials) {
     return Api().post('/addPost', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
   },
-  addFriend (credentials) {
-    return Api().post('/searchFriend', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
-  },
   deleteFriend (credentials) {
     return Api().delete(`/user/${credentials.id}`, { params: { id: credentials.frie_id }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
   },
@@ -21,5 +18,14 @@ export default {
   },
   addRecordCT (credentials) {
     return Api().post(`/friend/${credentials.id}`, credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  },
+  responseToRequest (credentials) {
+    return Api().post(`/user/${credentials.data.frie_id}/inbox`, credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  },
+  updateMessage (credentials) {
+    return Api().patch(`/user/${credentials.id}/inbox`, credentials.info, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  },
+  deleteMessage (credentials) {
+    return Api().delete(`/user/${credentials.id}/inbox`, { params: { mId: credentials.mId }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
   }
 }

@@ -9,7 +9,7 @@
       class="form-control"
       style="z-index:1;"
     >
-    <button class="btn btn-link" @click.prevent="$emit('resetValue')" style="z-index:2;right:0;top:0;bottom:0;position:absolute;margin:auto">
+    <button class="btn btn-link mr-2" @click.prevent="$emit('resetValue')" style="z-index:2;right:0;top:0;bottom:0;position:absolute;">
       <i class="fas fa-times"></i>
     </button>
   </div>

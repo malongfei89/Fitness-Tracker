@@ -5,23 +5,25 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const CustomError = require('../models/CustomError')
 
-//search a user by username
-/* app.get('/searchFriend', (req, res, next) => {
-  user.getUserInfo(req.query.id)
-  .then(data => {
-    if (!data[0]) throw new CustomError('There is no such user in our system!', 404)
-    else {
-      const { created_at, last_update, username, password, ...result } = data[0]
-      res.send(result)
-    }
-  })
-  .catch(next)
-}) */
+//search a user by ID
+app.get('/searchFriend', async (req, res, next) => {
+  try {const checkResult = await user.checkIfFriends(req.query.toId, req.query.fromId)
+    // console.log(checkResult)
+    if(checkResult[0]) throw new CustomError('You guys are already friends!', 404)
+    user.getUserInfo(req.query.toId)
+    .then(data => {
+      console.log(data)
+      if (!data[0]) throw new CustomError('There is no such user in our system!', 404)
+      res.send(data[0])
+    })
+    .catch(next)
+  } catch(error) { next(error) }
+})
 app.get('/searchFriend', (req, res, next) => {
   //console.log(req.query.id)
-  user.getUserInfo2(req.query.id)
+  user.getUserInfo2(req.query)
   .then(data => {
-    if (!data.length) throw new CustomError('There is no such user in our system!', 404)
+    if (!data.length) throw new CustomError('The user is either not in our system or already your friend!', 404)
     else {
       let results = data.map(user => {
         const { created_at, last_update, username, password, ...result } = user
@@ -39,7 +41,6 @@ app.post('/searchFriend', (req, res, next) => {
 })
 app.get('/friend/:id', async (req, res, next) => {
   try {
-    console.log(req.query)
     if (!req.query.id) {
       let data=[]
       data[0] = await user.getUserInfo(req.params.id)
@@ -73,6 +74,45 @@ app.delete('/user/:id', (req, res, next) => {
 app.get('/user/:id', (req, res, next) => {
   user.getInfo(req.params.id)
   .then(data => res.send(data))
+  .catch(next)
+})
+//get unread messages or all messages
+app.get('/user/:id/inbox', async (req, res, next) => {
+  try {
+    data = await user.getMessages(req.params.id, parseInt(req.query.needUnread))
+    res.send(data)
+  } catch(error) {next(error)}
+})
+//process response to message
+app.post('/user/:id/inbox', (req, res, next) => {
+  switch (req.body.type) {
+    case 'add-friend': {
+      if (req.body.process_result === 'accepted') {
+        user.addFriend(req.body)
+        .then(() => {
+          user.updateMessage(req.body)
+          .then(() => res.sendStatus(200))
+          .catch(next)
+        })
+        .catch(next)
+      } else {
+        user.updateMessage(req.body)
+        .then(() => res.sendStatus(200))
+        .catch(next)
+      }
+    }
+  }
+})
+//update message
+app.patch('/user/:id/inbox', (req, res, next) => {
+  user.updateMessage(req.body)
+  .then(() => res.sendStatus(200))
+  .catch(next)
+})
+//delete messagee
+app.delete('/user/:id/inbox', (req, res, next) => {
+  user.deleteMessage(req.query.mId)
+  .then(() => res.sendStatus(200))
   .catch(next)
 })
 //update user profile

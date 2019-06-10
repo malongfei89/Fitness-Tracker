@@ -1,12 +1,20 @@
-const express = require('express')
-const morgan = require('morgan')
-const cors = require('cors')
-const bodyparser = require('body-parser')
+const express = require('../node_modules/express')
 const app = express()
-const handlerequest = require('./controller/handlerequests')
-const jwt = require('jsonwebtoken')
+const morgan = require('../node_modules/morgan')
+const cors = require('../node_modules/cors')
+const bodyparser = require('../node_modules/body-parser')
+const handleHttpRequest = require('./controller/handleHttpRequests')
+const handleWsRequest = require('./controller/handleWsRequest')
+const jwt = require('../node_modules/jsonwebtoken')
 const CustomError = require('./models/CustomError')
+const server = require('http').Server(app)
+const io = require('../node_modules/socket.io')(server)
 
+server.listen(3000, () => console.log('Listening at port 3000'))
+io.on('connection', handleWsRequest)
+/* io.on('connection', (socket) => {
+  console.log(socket.id)
+}) */
 app.use(morgan('combined'))
 app.use(cors())
 app.use(bodyparser.json())
@@ -21,13 +29,11 @@ app.use((req, res, next) => {
     next()
   }
 })
-app.use('/', handlerequest)
-app.get('/', (req, res) => {
-  res.send("Hello!")
-})
+app.use('/', handleHttpRequest)
 app.use((err, req, res, next) => {
-  console.log(err.message)
   if (err.name === 'CustomError') res.status(err.status).send({error: err.message})
-  else res.status(500).send({error :'Internal error, please try again later!'})
+  else {
+    console.log(err.message)
+    res.status(500).send({error :'Internal error, please try again later!'})
+  }
 })
-app.listen(3000, () => console.log('Listening at port 3000'))

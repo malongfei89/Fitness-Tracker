@@ -1,5 +1,5 @@
 const conn = require('./mysql-connection')
-const bcrypt = require('bcrypt')
+const bcrypt = require('../../node_modules/bcrypt')
 const SALTROUND = 10
 const CustomError = require('./CustomError')
 
@@ -8,12 +8,12 @@ module.exports= {
   findUserByUsername(username) {
     return conn.query('select * from users where username = ?', username)
   },
+  checkIfFriends (toId, fromId) {
+    return conn.query('select id from friends where users2_id=? and frie_id=?',[toId, fromId])
+  },
   //get user profile
   getUserInfo(id) {
     return conn.query('select id, first_name, last_name, nickname, birthday, user_icon from users where id=?', id)
-  },
-  getUserInfo2(id) {
-    return conn.query(`select id, first_name, last_name, nickname, birthday, user_icon from users where id REGEXP '^${id}'`)
   },
   //get friend posts
   getUserRecords(id) {
@@ -92,10 +92,31 @@ module.exports= {
     return conn.query(`insert into records (created_at, user_id, exer_id, amount) value(?);`,
       [[new Date(), input.id, input.exer_id, input.amount]])
   },
+  async addMessage(input) {
+    const checkIfMExists = await conn.query('select id from user_message_records where from_id = ? and to_id = ? and message_type = ?', [input.fromId, input.toId, input.mType])
+    if (checkIfMExists.length) throw new Error('The request has been sent to the user. Please wait for user\'s response')
+    return conn.query('insert into user_message_records (created_at, from_id, to_id, message_type) value(?)',
+    [[new Date(), input.fromId, input.toId, input.mType]])
+  },
+  addNotification(input) {
+    return conn.query('insert into user_message_records (created_at, from_id, to_id, message_type, process_result, related_to) value(?)',
+    [[new Date(), input.toId, input.fromId, 'notification', input.decision, input.type]])
+  },
+  getMessages(id, needUnread) {
+    if(needUnread) return conn.query('select count(*) as total from user_message_records where to_id = ? and is_read = 0', id)
+    else return conn.query(`select related_to, user_message_records.id as mId, user_message_records.created_at, user_message_records.last_update, first_name, nickname, users.id as fromId, process_result,
+      is_read, message_type from users join user_message_records on users.id = user_message_records.from_id where to_id = ?`, id)
+  },
+  updateMessage(input) {
+    if(input.is_read !== undefined && !input.process_result) return conn.query('update user_message_records set is_read = ? where id=?', [input.is_read, input.id])
+    else if(input.process_result) return conn.query('update user_message_records set process_result = ? where id=?', [input.process_result, input.id])
+  },
+  deleteMessage(mId) {
+    return conn.query('delete from user_message_records where id = ?', mId)
+  },
   async addFriend(input) {
     const data = await conn.query('select * from friends where users2_id = ? and frie_id = ?', [input.user_id, input.frie_id])
-    const data1 = await conn.query('select * from friends where users2_id = ? and frie_id = ?', [input.frie_id, input.user_id])
-    if (data.length === 0 || data1.length === 0)
+    if (data.length === 0)
       return conn.query(`insert into friends (created_at, users2_id, frie_id) value(?);
         insert into friends (created_at, users2_id, frie_id) value(?);`,
         [[new Date(), input.user_id, input.frie_id ],[new Date(), input.frie_id, input.user_id ]])

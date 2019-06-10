@@ -8,6 +8,7 @@ import MyProfile from '@/views/MyProfile'
 import ChangePw from '@/views/ChangePw'
 import SearchFriend from '@/views/SearchFriend'
 import AddPost from '@/views/AddPost'
+import Inbox from '@/views/Inbox'
 import Friend from '@/views/Friend'
 import store from './store'
 
@@ -61,6 +62,11 @@ const router = new Router({
       path: '/addPost',
       name: 'addPost',
       component: AddPost
+    },
+    {
+      path: '/user/:id/inbox',
+      name: 'inbox',
+      component: Inbox
     }
   ]
 })

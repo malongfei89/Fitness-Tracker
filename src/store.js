@@ -5,7 +5,7 @@ import createPersistedState from 'vuex-persistedstate'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  plugins: [createPersistedState()],
+  plugins: [createPersistedState({ storage: window.sessionStorage })],
   state: {
     user: {
       token: null,
@@ -23,12 +23,14 @@ export default new Vuex.Store({
     info: {
       type: null,
       message: null
-    }
+    },
+    numOfUnreadMessages: 0
   },
   getters: {
     getUser: state => state.user,
     getRedirectRoute: state => state.redirectRoute,
-    getInfo: state => state.info
+    getInfo: state => state.info,
+    getnumOfUnreadMessages: state => state.numOfUnreadMessages
   },
   mutations: {
     setUser (state, user) {
@@ -47,6 +49,9 @@ export default new Vuex.Store({
     setInfo (state, info) {
       state.info.type = info.type
       state.info.message = info.message
+    },
+    setnumOfUnreadMessages (state, numOfUnreadMessages) {
+      state.numOfUnreadMessages = numOfUnreadMessages
     }
   },
   actions: {
@@ -58,6 +63,9 @@ export default new Vuex.Store({
     },
     setInfo ({ commit }, info) {
       commit('setInfo', info)
+    },
+    setnumOfUnreadMessages ({ commit }, numOfUnreadMessages) {
+      commit('setnumOfUnreadMessages', numOfUnreadMessages)
     }
   }
 })

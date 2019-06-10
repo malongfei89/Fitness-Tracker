@@ -2,8 +2,12 @@
   <div>
     <Header>
       <template #customized1>
-        <router-link class="btn btn-dark" :to="`/user/${user.id}`">My page</router-link>
+        <router-link class="nav-link" active-class="active" :to="`/user/${user.id}`">My Page</router-link>
       </template>
+      <template #customized2>
+        <router-link class="nav-link" active-class="active" to="/myProfile">My Profile</router-link>
+      </template>
+      <router-link class="btn btn-dark" to="/changePw">Change Password</router-link>
     </Header>
     <div class="container row mt-4">
     <div class="col-6 card offset-1">
@@ -28,9 +32,9 @@
                 </span>
               </button>
             </div>
-            <button @click="record.showComment = !record.showComment" class="col-1 btn btn-link">
+            <button @click="record.showComment = !record.showComment" class="col-2 btn btn-link">
               <span>
-                <i class="far fa-comment-dots"></i>
+                <i class="far fa-comment-dots"> {{record.numOfComments}}</i>
               </span>
             </button>
           </div>
@@ -88,7 +92,6 @@ export default {
   name: 'friend',
   data: () => {
     return {
-      user: {},
       friendProfile: {},
       friendRecord: []
     }
@@ -97,11 +100,13 @@ export default {
     getRightDate: function () {
       if (this.friendProfile.birthday == null) return
       return this.friendProfile.birthday.split('T')[0]
+    },
+    user: function () {
+      return this.$store.state.user
     }
   },
   async beforeMount () {
     const alias = this
-    this.user = this.getUser()
     try {
       const friendInfo = (await GetInfo.getFriendInfo({
         id: parseInt(this.$route.params.id),
