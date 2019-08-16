@@ -24,7 +24,7 @@ app.use((req, res, next) => {
     jwt.verify(token, process.env.Secret)
     next()
   } catch (error) {
-    const allowedActions = ['POST/register', 'POST/login']
+    const allowedActions = ['POST/register', 'POST/login', 'GET/forgetPW', 'PATCH/forgetPW']
     if (!allowedActions.includes(req.method + req.path)) next(new CustomError('Log in required!', 401))
     next()
   }

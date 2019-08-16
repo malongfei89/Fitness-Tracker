@@ -11,7 +11,8 @@ import AddPost from '@/views/AddPost'
 import Inbox from '@/views/Inbox'
 import Friend from '@/views/Friend'
 import store from './store'
-
+import WorkoutPlan from '@/views/WorkoutPlan'
+import ForgetPassword from '@/views/ForgetPassword'
 Vue.use(Router)
 
 const router = new Router({
@@ -67,12 +68,22 @@ const router = new Router({
       path: '/user/:id/inbox',
       name: 'inbox',
       component: Inbox
+    },
+    {
+      path: '/user/:id/workoutPlan',
+      name: 'workoutPlan',
+      component: WorkoutPlan
+    },
+    {
+      path: '/forgetPW',
+      name: 'forgetPassword',
+      component: ForgetPassword
     }
   ]
 })
 router.beforeEach((to, from, next) => {
   const user = store.state.user
-  const allowedEndPoint = ['home', 'login', 'register']
+  const allowedEndPoint = ['home', 'login', 'register', 'forgetPassword']
   if (!allowedEndPoint.includes(to.name) && !user.id) {
     store.dispatch('setRedirectRoute', {
       name: to.name,

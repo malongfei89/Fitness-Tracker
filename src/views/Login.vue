@@ -20,6 +20,7 @@
       <div class="form-group form-group-lg">
         <label class="col-form-label-lg">Email address</label>
         <ClearableInput
+          autocomplete = "on"
           type="email"
           v-model="email"
           placeholder="Enter email"
@@ -32,6 +33,7 @@
       <div class="form-group form-group-lg">
         <label class="col-form-label-lg">Password</label>
         <ClearableInput
+          autocomplete = "on"
           type="password"
           v-model="password"
           placeholder="Password"
@@ -40,6 +42,9 @@
       <div class="row ml-1">
         <button type="button" @click="login" class="btn btn-dark btn-lg col-1">Log in</button>
         <button type="button" @click="fbLogin" class="btn btn-dark btn-lg offset-1">Log in with Facebook</button>
+      </div>
+      <div class="mt-2">
+        <router-link to="/forgetPW">Forget Password</router-link>
       </div>
     </form>
   </div>

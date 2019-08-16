@@ -7,6 +7,9 @@
       <template #customized2>
         <router-link class="nav-link" active-class="active" to="/myProfile">My Profile</router-link>
       </template>
+      <template #customized3>
+        <router-link class="nav-link" active-class="active" :to="`/user/${hasUser.id}/workoutPlan`">Workout Plan</router-link>
+      </template>
       <router-link class="btn btn-dark" to="/changePw">Change Password</router-link>
     </Header>
     <nav v-else class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -27,7 +30,7 @@
     </nav>
     <p class="display-3">Welcome to Fitness Tracker!</p>
     <div class="text-center">
-      <p class="lead">Here you can Track your exercise record and share with your friends through your fingertip!</p>
+      <p class="lead display-4">Here you can Track your exercise record and share with your friends through your fingertip!</p>
       <img src="https://crhsbaitline.com/wp-content/uploads/2018/03/all-sports-1.png" alt="">
     </div>
   </div>

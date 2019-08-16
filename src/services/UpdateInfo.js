@@ -1,31 +1,31 @@
 import Api from './Api'
 
 export default {
-  updateProfile (credentials) {
-    return Api().post('/myProfile', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  updateProfile (credential) {
+    return Api().post('/myProfile', credential.data, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  updatePw (credentials) {
-    return Api().patch('/changePw', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  updatePw (credential) {
+    return Api().patch('/changePw', credential.data, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  addPost (credentials) {
-    return Api().post('/addPost', credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  addPost (credential) {
+    return Api().post('/addPost', credential.data, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  deleteFriend (credentials) {
-    return Api().delete(`/user/${credentials.id}`, { params: { id: credentials.frie_id }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  deleteFriend (credential) {
+    return Api().delete(`/user/${credential.id}`, { params: { id: credential.frie_id }, headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  deleteRecordCT (credentials) {
-    return Api().patch(`/friend/${credentials.id}`, credentials.CTId, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  deleteRecordCT (credential) {
+    return Api().patch(`/friend/${credential.id}`, credential.CTId, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  addRecordCT (credentials) {
-    return Api().post(`/friend/${credentials.id}`, credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  addRecordCT (credential) {
+    return Api().post(`/friend/${credential.id}`, credential.data, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  responseToRequest (credentials) {
-    return Api().post(`/user/${credentials.data.frie_id}/inbox`, credentials.data, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  responseToRequest (credential) {
+    return Api().post(`/user/${credential.data.frie_id}/inbox`, credential.data, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  updateMessage (credentials) {
-    return Api().patch(`/user/${credentials.id}/inbox`, credentials.info, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  updateMessage (credential) {
+    return Api().patch(`/user/${credential.id}/inbox`, credential.info, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  deleteMessage (credentials) {
-    return Api().delete(`/user/${credentials.id}/inbox`, { params: { mId: credentials.mId }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  deleteMessage (credential) {
+    return Api().delete(`/user/${credential.id}/inbox`, { params: { mId: credential.mId }, headers: { 'Authorization': 'Bearer ' + credential.token } })
   }
 }

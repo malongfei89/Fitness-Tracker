@@ -5,6 +5,7 @@
       :type="type"
       :placeholder="placeholder"
       :id = "id"
+      :autocomplete="autocomplete"
       @input="$emit('input', $event.target.value)"
       class="form-control"
       style="z-index:1;"
@@ -18,7 +19,7 @@
 <script>
 export default {
   name: 'clearableInput',
-  props: ['value', 'type', 'placeholder', 'id']
+  props: ['value', 'type', 'placeholder', 'id', 'autocomplete']
 }
 </script>
 

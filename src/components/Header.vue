@@ -44,32 +44,44 @@ export default {
       return this.$store.state.numOfUnreadMessages
     }
   },
-  async mounted () {
+  async created () {
     try {
       const newUnread = (await GetInfo.getMessages({
         id: this.user.id,
         token: this.user.token,
         needUnread: 1
       })).data
-      if (newUnread[0].total) this.$store.dispatch('setnumOfUnreadMessages', newUnread[0].total)
+      if (newUnread[0].total) {
+        this.$store.dispatch('setnumOfUnreadMessages', newUnread[0].total)
+      }
       socket.currentSocket.on('newMessage', (id) => {
         if (store.state.user.id === id) {
-          this.$store.state.numOfUnreadMessages++
           let popUp = document.getElementById('mypopup')
           popUp.classList.add('show')
           setTimeout(() => {
             popUp.classList.remove('show')
           }, 3000)
+          if (this.$route.path === `/user/${this.user.id}/inbox`) {
+            this.$emit('newMessage')
+          } else {
+            this.$store.dispatch('setnumOfUnreadMessages', 1)
+          }
         }
       })
+      // need to figure out where this is supposed to be
       socket.currentSocket.on('newResponse', (id) => {
         if (store.state.user.id === id) {
-          this.$store.state.numOfUnreadMessages++
           let popUp = document.getElementById('mypopup')
           popUp.classList.add('show')
           setTimeout(() => {
             popUp.classList.remove('show')
           }, 3000)
+          this.$store.dispatch('setnumOfUnreadMessages', 1)
+          if (this.$route.path === `/user/${this.user.id}/inbox`) {
+            this.$emit('newMessage')
+          } else {
+            this.$store.dispatch('setnumOfUnreadMessages', 1)
+          }
         }
       })
     } catch (error) {

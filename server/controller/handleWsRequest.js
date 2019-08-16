@@ -1,8 +1,11 @@
 const user = require('../models/user')
+let numOfSocket = 0
 module.exports = (socket) => {
-  console.log('user connected')
+  numOfSocket++
+  console.log(numOfSocket + ' connected')
   socket.on('disconnect', () => {
-      console.log('user disconnected')
+    numOfSocket--
+      console.log(numOfSocket + ' connected')
   })
   socket.on('newRequest', async (data) => {
     try {

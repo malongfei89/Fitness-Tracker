@@ -4,6 +4,9 @@
       <template #customized1>
         <router-link class="nav-link" active-class="active" to="/myProfile">My Profile</router-link>
       </template>
+      <template #customized2>
+        <router-link class="nav-link" active-class="active" :to="`/user/${user.id}/workoutPlan`">Workout Plan</router-link>
+      </template>
       <router-link class="btn btn-dark" to="/changePw">Change Password</router-link>
     </Header>
     <p class="display-4 ml-4">Welcome back {{greetname()}} !</p>
@@ -69,7 +72,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
 import GetInfo from '../services/GetInfo'
 import UpdateInfo from '../services/UpdateInfo'
 import { calculateTime } from '@/services/Helper'
@@ -77,14 +80,17 @@ export default {
   name: 'user',
   data () {
     return {
-      user: {},
       posts: [],
       friends: [],
       activeStatus: []
     }
   },
+  computed: {
+    user: function () {
+      return this.$store.state.user
+    }
+  },
   async mounted () {
-    this.user = this.getUser()
     const info = (await GetInfo.getInfo({
       data: this.user.id,
       token: this.user.token
@@ -96,9 +102,6 @@ export default {
   methods: {
     ...mapActions([
       'setUser'
-    ]),
-    ...mapGetters([
-      'getUser'
     ]),
     greetname () {
       return this.user.first_name || 'user'

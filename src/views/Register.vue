@@ -20,6 +20,7 @@
       <div class="form-group form-group-lg">
         <label class="col-form-label-lg">Email address</label>
         <ClearableInput
+          autocomplete = "off"
           placeholder="Enter email"
           type="email"
           v-model="email" @resetValue="email = ''"/>
@@ -31,6 +32,7 @@
       <div class="form-group form-group-lg">
         <label class="col-form-label-lg">Password</label>
         <ClearableInput
+          autocomplete = "off"
           type="password"
           v-model="password"
           placeholder="Password"
@@ -47,6 +49,7 @@
 
 <script>
 import AuthenticationService from '../services/AuthenticationService'
+import { setTimeout } from 'timers'
 export default {
   name: 'register',
   data () {
@@ -67,9 +70,13 @@ export default {
           username: this.email,
           password: this.password
         })
+        const alias = this
         this.id = data.data.insertId
         this.$store.dispatch('setInfo', { type: 'success', message: `Congratulations! You have successfully registered! Your FitnessID is ${this.id}! You can
           log-in now!` })
+        setTimeout(() => {
+          alias.$router.push('/login')
+        }, 1000)
       } catch (error) {
         this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
       }

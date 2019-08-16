@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Header>
+    <Header @newMessage="getNewMessage">
       <template #customized1>
         <router-link class="nav-link" active-class="active" :to="`/user/${user.id}`">My Page</router-link>
       </template>
@@ -12,7 +12,7 @@
     <div class="container">
       <h3>Inbox</h3>
       <div class="row">
-        <ul class="list-group col-6">
+        <ul class="list-group col-6" v-cloak>
           <li class="list-group-item">
             <div class="row">
               <div class="col-3 offset-1">From</div>
@@ -20,7 +20,8 @@
               <div class="col-4">When</div>
             </div>
           </li>
-          <li class="list-group-item messageItem" v-for="(message, index) of allMessages" :key="index" @click="openMessage(index)">
+          <transition-group name="singleMessage">
+          <li class="list-group-item messageItem" v-for="(message, index) of allMessages" :key="message.mId" @click="openMessage(index)">
             <div class="row align-items-center">
               <div class="col-1" v-if="!message.is_read"><i class="fas fa-circle" style="color:blue"></i></div>
               <div class="col-1" v-else><i class="fas fa-circle" style="color:white"></i></div>
@@ -34,6 +35,7 @@
               </div>
             </div>
           </li>
+          </transition-group>
         </ul>
         <div class="col-3 card d-none" id="message">
           <div class="text-right">
@@ -47,11 +49,11 @@
             <div class="mt-2">
               <router-link class="btn btn-dark" :to="`/friend/${currentMessage.fromId}`">View profile</router-link>
             </div>
-            <div class="mt-2" id="process-button-group" v-if="!currentMessage.process_result">
+            <div class="mt-2" id="process-button-group" v-if="!currentMessage.process_result && currentMessage.message_type !== 'notification'">
               <button class="btn-sm btn-dark" @click="acceptRequest">Accept</button>
               <button class="ml-3 btn-sm btn-dark" @click="declineRequest">Decline</button>
             </div>
-            <p class="mt-2" v-else>{{currentMessage.process_result}} by you {{getRightDate(new Date(currentMessage.last_update))}}</p>
+            <p class="mt-2" v-if="currentMessage.process_result && currentMessage.message_type !== 'notification'">{{currentMessage.process_result}} by you {{getRightDate(new Date(currentMessage.last_update))}}</p>
           </div>
         </div>
       </div>
@@ -64,17 +66,22 @@ import socket from '../socketServices/socket'
 import GetInfo from '../services/GetInfo'
 import UpdateInfo from '../services/UpdateInfo'
 import { calculateTime } from '@/services/Helper'
+import { setTimeout } from 'timers'
 export default {
   name: 'inbox',
   data: () => {
     return {
       allMessages: [],
-      currentMessage: {}
+      currentMessage: {},
+      messageOpen: false
     }
   },
   computed: {
     user: function () {
       return this.$store.state.user
+    },
+    numOfUnreadMessages: function () {
+      return this.$store.state.numOfUnreadMessages
     }
   },
   async mounted () {
@@ -92,29 +99,40 @@ export default {
     }
   },
   methods: {
-    logout () {
-      this.$store.dispatch('setUser', {
-        token: null,
-        id: null,
-        first_name: '',
-        last_name: '',
-        nickname: '',
-        birthday: null,
-        user_icon: ''
+    async getNewMessage () {
+      let startId = this.allMessages.length ? this.allMessages[this.allMessages.length - 1].mId : '0'
+      let newMessages = (await GetInfo.getMessages({
+        id: this.user.id,
+        token: this.user.token,
+        needUnread: 1,
+        startId: startId
+      })).data
+      this.$store.dispatch('setInfo', {
+        type: 'info',
+        message: 'You\'ve got a new message!'
       })
-      this.$store.dispatch('setnumOfUnreadMessages', 0)
-      this.$store.commit('setRedirectRoute', {
-        name: null,
-        id: null
-      })
-      this.$router.push('/')
+      this.$store.dispatch('setnumOfUnreadMessages', this.numOfUnreadMessages + newMessages.length)
+      this.allMessages.unshift(...newMessages)
     },
     getRightDate (date) {
       return calculateTime(date)
     },
     async openMessage (index) {
       const openReadMessage = this.allMessages[index].is_read
-      document.getElementById('message').classList.remove('d-none')
+      let message = document.getElementById('message')
+      if (this.messageOpen) {
+        message.classList.add('slowshow')
+        setTimeout(() => {
+          message.classList.remove('slowshow')
+        }, 980)
+      } else {
+        this.messageOpen = true
+        message.classList.remove('d-none')
+        message.classList.add('slowshow')
+        setTimeout(() => {
+          message.classList.remove('slowshow')
+        }, 980)
+      }
       if (!openReadMessage) this.$set(this.allMessages[index], 'is_read', true)
       this.currentMessage = this.allMessages[index]
       this.currentMessage.index = index
@@ -124,9 +142,9 @@ export default {
           break
         case 'notification':
           if (this.currentMessage.process_result === 'accepted') {
-            document.getElementById('messagedetail').innerHTML = `Congratulations! ${this.currentMessage.nickname || this.currentMessage.first_name} has accepted your ${this.currentMessage.related_to} request!`
+            document.getElementById('messagedetail').innerHTML = `Congratulations! ${this.currentMessage.nickname || this.currentMessage.first_name} has accepted your ${this.currentMessage.response_type} request!`
           } else if (this.currentMessage.process_result === 'declined') {
-            document.getElementById('messagedetail').innerHTML = `Unfortunately, ${this.currentMessage.nickname || this.currentMessage.first_name} has declined your ${this.currentMessage.related_to} request!`
+            document.getElementById('messagedetail').innerHTML = `Unfortunately, ${this.currentMessage.nickname || this.currentMessage.first_name} has declined your ${this.currentMessage.response_type} request!`
           }
           break
         default:
@@ -142,7 +160,7 @@ export default {
               id: this.currentMessage.mId
             }
           })
-          this.$store.state.numOfUnreadMessages--
+          this.$store.dispatch('setnumOfUnreadMessages', this.$store.state.numOfUnreadMessages - 1)
         } catch (error) {
           this.$store.dispatch('setInfo', { type: 'danger', message: error.data.response.error })
         }
@@ -171,7 +189,7 @@ export default {
               decision: 'accepted',
               fromId: this.currentMessage.fromId,
               toId: this.user.id,
-              id: this.currentMessage.id
+              id: this.currentMessage.mId
             })
           } catch (error) {
             this.$store.dispatch('setInfo', { type: 'danger', message: error.data.response.error })
@@ -202,7 +220,7 @@ export default {
               decision: 'declined',
               fromId: this.currentMessage.fromId,
               toId: this.user.id,
-              id: this.currentMessage.id
+              id: this.currentMessage.mId
             })
           } catch (error) {
             this.$store.dispatch('setInfo', { type: 'danger', message: error.data.response.error })
@@ -211,10 +229,16 @@ export default {
       }
     },
     closeMessage () {
-      document.getElementById('message').classList.add('d-none')
+      let message = document.getElementById('message')
+      message.classList.add('slowfade')
+      setTimeout(() => {
+        message.classList.add('d-none')
+        message.classList.remove('slowshow')
+        message.classList.remove('slowfade')
+      }, 980)
+      this.messageOpen = false
     },
     async deleteMessage (index) {
-      console.log(index)
       try {
         await UpdateInfo.deleteMessage({
           id: this.user.id,
@@ -223,9 +247,11 @@ export default {
         })
         if (this.currentMessage.index === index) {
           this.closeMessage()
-          this.currentMessage = {}
         }
-        this.allMessages.splice(index)
+        if (!this.allMessages[index].is_read) {
+          this.$store.dispatch('setnumOfUnreadMessages', this.$store.state.numOfUnreadMessages - 1)
+        }
+        this.allMessages.splice(index, 1)
       } catch (error) {
         this.$store.dispatch('setInfo', {
           type: 'danger',
@@ -240,5 +266,31 @@ export default {
 <style>
 .messageItem :hover{
   cursor: pointer;
+}
+.slowshow {
+  animation-name: slowshow;
+  animation-duration: 1s;
+}
+.slowfade {
+  animation-name: slowfade;
+  animation-duration: 1s;
+}
+.singleMessage-enter, .singleMessage-leave-to {
+  transform: translateY(-30px);
+  opacity: 0;
+}
+.singleMessage-enter-active, .singleMessage-leave-active {
+  transition: all , 0.8s;
+}
+@keyframes slowshow{
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+@keyframes slowfade{
+  from {opacity: 1;}
+  to {opacity: 0;}
+}
+[v-cloak]{
+  display: none;
 }
 </style>

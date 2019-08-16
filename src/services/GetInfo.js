@@ -1,19 +1,19 @@
 import Api from './Api'
 
 export default {
-  getInfo (credentials) {
-    return Api().get(`/user/${credentials.data}`, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  getInfo (credential) {
+    return Api().get(`/user/${credential.data}`, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  getExerciseTypes (credentials) {
-    return Api().get('/addPost', { headers: { 'Authorization': 'Bearer ' + credentials } })
+  getExerciseTypes (credential) {
+    return Api().get('/addPost', { headers: { 'Authorization': 'Bearer ' + credential } })
   },
-  getUserInfo (credentials) {
-    return Api().get(`/searchFriend`, { params: { toId: credentials.toId, fromId: credentials.fromId }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  getUserInfo (credential) {
+    return Api().get(`/searchFriend`, { params: { toId: credential.toId, fromId: credential.fromId }, headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  getFriendInfo (credentials) {
-    return credentials.recordInfo ? Api().get(`/friend/${credentials.id}`, { params: { ...credentials.recordInfo }, headers: { 'Authorization': 'Bearer ' + credentials.token } }) : Api().get(`/friend/${credentials.id}`, { headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  getFriendInfo (credential) {
+    return credential.recordInfo ? Api().get(`/friend/${credential.id}`, { params: { ...credential.recordInfo }, headers: { 'Authorization': 'Bearer ' + credential.token } }) : Api().get(`/friend/${credential.id}`, { headers: { 'Authorization': 'Bearer ' + credential.token } })
   },
-  getMessages (credentials) {
-    return Api().get(`/user/${credentials.id}/inbox`, { params: { needUnread: credentials.needUnread }, headers: { 'Authorization': 'Bearer ' + credentials.token } })
+  getMessages (credential) {
+    return Api().get(`/user/${credential.id}/inbox`, { params: { needUnread: credential.needUnread, startId: credential.startId }, headers: { 'Authorization': 'Bearer ' + credential.token } })
   }
 }
