@@ -1,29 +1,17 @@
 # Fitness Tracker
 
-## Project setup
-```
-npm install
-```
+## Bootstrap for styling, VueJs as frontend framework, JavaScript (Express for Node.js) at backend and MySQL. 
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## Fully functional application designed in mvc pattern:
 
-### Compiles and minifies for production
-```
-npm run build
-```
+controllers: handleHttpRequests.js and handleWsRequest.js
 
-### Run your tests
-```
-npm run test
-```
+models: user.js(for all database query), CustomError.js(customized error type), mysql-connection.js, sendEmail.js(email system)
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Features:
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+1.basic functionalities: register, log in, change password, reset password, add/delete friend, view friend page, post workout or share your mood;
+
+2.social media functionalities: thumbs-up, comments, real-time messaging system, email system;
+
+3.centralized toastr message, reusable clearable input box (not pre-built third-party modules)
