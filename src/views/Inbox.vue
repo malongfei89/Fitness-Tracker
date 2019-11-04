@@ -142,9 +142,9 @@ export default {
           break
         case 'notification':
           if (this.currentMessage.process_result === 'accepted') {
-            document.getElementById('messagedetail').innerHTML = `Congratulations! ${this.currentMessage.nickname || this.currentMessage.first_name} has accepted your ${this.currentMessage.response_type} request!`
+            document.getElementById('messagedetail').innerHTML = `Congratulations! ${this.currentMessage.nickname || this.currentMessage.first_name} has accepted your request!`
           } else if (this.currentMessage.process_result === 'declined') {
-            document.getElementById('messagedetail').innerHTML = `Unfortunately, ${this.currentMessage.nickname || this.currentMessage.first_name} has declined your ${this.currentMessage.response_type} request!`
+            document.getElementById('messagedetail').innerHTML = `Unfortunately, ${this.currentMessage.nickname || this.currentMessage.first_name} has declined your request!`
           }
           break
         default:
@@ -185,7 +185,6 @@ export default {
             this.$store.dispatch('setInfo', { type: 'success', message: `You've accepted the request from ${this.currentMessage.nickname || this.currentMessage.first_name}!` })
             this.allMessages[this.currentMessage.index].process_result = 'accepted'
             socket.currentSocket.emit('requestMade', {
-              type: 'add-friend',
               decision: 'accepted',
               fromId: this.currentMessage.fromId,
               toId: this.user.id,
@@ -216,7 +215,6 @@ export default {
             this.$store.dispatch('setInfo', { type: 'success', message: `You've declined the request from ${this.currentMessage.nickname || this.currentMessage.first_name}!` })
             this.allMessages[this.currentMessage.index].process_result = 'declined'
             socket.currentSocket.emit('requestMade', {
-              type: 'add-friend',
               decision: 'declined',
               fromId: this.currentMessage.fromId,
               toId: this.user.id,

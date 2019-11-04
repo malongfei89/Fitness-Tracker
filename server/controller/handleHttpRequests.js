@@ -6,15 +6,17 @@ const bcrypt = require('bcrypt')
 const CustomError = require('../models/CustomError')
 const sendEmail = require('../models/sendEmail')
 const ramdomatic = require('randomatic')
+const icon = 'Fitness Tracker'
+const changePwHTML = '<h1>You just changed your password!<h1><br /><h2>Fitness Tracker Team</h2>'
+
 require('dotenv').config()
 
 //reset password
 app.patch('/forgetPW', async (req, res, next) => {
   try {
-    const changePwHTML = '<h1>You just changed your password!<h1><br /><h2>Fitness Tracker Team</h2>'
     await user.resetPassword(req.body)
     res.sendStatus(200)
-    await sendEmail.sendEmail(process.env.EMAIL_USER, req.body.username, 'Password Changed','', changePwHTML)
+    await sendEmail.sendEmail(icon, req.body.username, 'Password Changed','', changePwHTML)
   } catch (error) {
     next(error)
   }  
@@ -25,7 +27,7 @@ app.get('/forgetPW', async (req, res, next) => {
     let code = ramdomatic('0', 6)
     console.log(code)
     let htmlContent = `<h1>Fitness Tracker Team</h1><h2>Here is your verification code for resetting password:</h2><h3 style="text-align: center;">${code}<h3>`
-    await sendEmail.sendEmail(process.env.EMAIL_USER, req.query.username, 'Forget password','', htmlContent)
+    await sendEmail.sendEmail(icon, req.query.username, 'Forget password','', htmlContent)
     res.send(code)
   } else{
     try{
@@ -144,10 +146,10 @@ app.post('/myProfile', (req, res, next) => {
 //change password
 app.patch('/changePw', async (req, res, next) => {
   try {
-    const changePwHTML = '<h1>You just changed your password!<h1><br /><p>Fitness Tracker Team</p>'
     await user.changePw(req.body)
-    await sendEmail.sendEmail('longfeim89@gmail.com', 'dsa@gmail.com', 'Password Changed','Password Changed', changePwHTML)
     res.sendStatus(200)
+    let username = await user.getUsername(req.body.id)
+    await sendEmail.sendEmail(icon, username[0].username, 'Password Changed','', changePwHTML)
   } catch (error) {
     next(error)
   }  

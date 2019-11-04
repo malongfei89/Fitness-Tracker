@@ -15,6 +15,10 @@ module.exports= {
   getUserInfo(id) {
     return conn.query('select id, first_name, last_name, nickname, birthday, user_icon from users where id=?', id)
   },
+  //get username
+  getUsername(id){
+    return conn.query('select username from users where id =?', id)
+  },
   //get friend posts
   getUserRecords(id) {
     return conn.query('select records.id, records.created_at, type, amount from records join exercise on records.exer_id = exercise.id where user_id = ?;', id)
@@ -111,15 +115,15 @@ module.exports= {
     [[new Date(), input.fromId, input.toId, input.mType]])
   },
   addNotification(input) {
-    return conn.query('insert into user_message_records (created_at, from_id, to_id, message_type, process_result, related_to, response_type) value(?)',
-    [[new Date(), input.toId, input.fromId, 'notification', input.decision, input.id, input.type]])
+    return conn.query('insert into user_message_records (created_at, from_id, to_id, message_type, process_result, related_to) value(?)',
+    [[new Date(), input.toId, input.fromId, 'notification', input.decision, input.id]])
   },
   getMessages(id, needUnread, startId) {
     if(needUnread) {
       if(!startId) return conn.query('select count(*) as total from user_message_records where to_id = ? and is_read = 0', id)
-      else return conn.query(`select response_type,related_to, user_message_records.id as mId, user_message_records.created_at, user_message_records.last_update, first_name, nickname, users.id as fromId, process_result,
+      else return conn.query(`select related_to, user_message_records.id as mId, user_message_records.created_at, user_message_records.last_update, first_name, nickname, users.id as fromId, process_result,
         is_read, message_type from users join user_message_records on users.id = user_message_records.from_id where to_id = ? and is_read = 0 and user_message_records.id > ?`, [id, startId])
-    } else return conn.query(`select response_type, related_to, user_message_records.id as mId, user_message_records.created_at, user_message_records.last_update, first_name, nickname, users.id as fromId, process_result,
+    } else return conn.query(`select related_to, user_message_records.id as mId, user_message_records.created_at, user_message_records.last_update, first_name, nickname, users.id as fromId, process_result,
     is_read, message_type from users join user_message_records on users.id = user_message_records.from_id where to_id = ? order by user_message_records.id desc`, id)
   },
   updateMessage(input) {

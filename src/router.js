@@ -4,15 +4,15 @@ import Home from './views/Home'
 import Register from './views/Register'
 import Login from '@/views/Login'
 import User from '@/views/User'
-import MyProfile from '@/views/MyProfile'
-import ChangePw from '@/views/ChangePw'
-import SearchFriend from '@/views/SearchFriend'
-import AddPost from '@/views/AddPost'
+// import MyProfile from '@/views/MyProfile'
+// import ChangePw from '@/views/ChangePw'
+// import SearchFriend from '@/views/SearchFriend'
+// import AddPost from '@/views/AddPost'
 import Inbox from '@/views/Inbox'
-import Friend from '@/views/Friend'
+// import Friend from '@/views/Friend'
 import store from './store'
-import WorkoutPlan from '@/views/WorkoutPlan'
-import ForgetPassword from '@/views/ForgetPassword'
+// import WorkoutPlan from '@/views/WorkoutPlan'
+// import ForgetPassword from '@/views/ForgetPassword'
 Vue.use(Router)
 
 const router = new Router({
@@ -42,27 +42,27 @@ const router = new Router({
     {
       path: '/friend/:id',
       name: 'friend',
-      component: Friend
+      component: () => import(/* webpackChunkName: "friend" */ './views/Friend.vue')
     },
     {
       path: '/myProfile',
       name: 'myProfile',
-      component: MyProfile
+      component: () => import(/* webpackChunkName: "myProfile" */ './views/MyProfile.vue')
     },
     {
       path: '/changePw',
       name: 'changePw',
-      component: ChangePw
+      component: () => import(/* webpackChunkName: "changePw" */ './views/ChangePw.vue')
     },
     {
       path: '/searchFriend',
       name: 'searchFriend',
-      component: SearchFriend
+      component: () => import(/* webpackChunkName: "searchFriend" */ './views/SearchFriend.vue')
     },
     {
       path: '/addPost',
       name: 'addPost',
-      component: AddPost
+      component: () => import(/* webpackChunkName: "addPost" */ './views/AddPost.vue')
     },
     {
       path: '/user/:id/inbox',
@@ -72,19 +72,19 @@ const router = new Router({
     {
       path: '/user/:id/workoutPlan',
       name: 'workoutPlan',
-      component: WorkoutPlan
+      component: () => import(/* webpackChunkName: "workoutPlan" */ './views/WorkoutPlan.vue')
     },
     {
       path: '/forgetPW',
       name: 'forgetPassword',
-      component: ForgetPassword
+      component: () => import(/* webpackChunkName: "forgetPassword" */ './views/ForgetPassword.vue')
     }
   ]
 })
 router.beforeEach((to, from, next) => {
   const user = store.state.user
   const allowedEndPoint = ['home', 'login', 'register', 'forgetPassword']
-  if (!allowedEndPoint.includes(to.name) && !user.id) {
+  if (!allowedEndPoint.includes(to.name) && user.id === null) {
     store.dispatch('setRedirectRoute', {
       name: to.name,
       id: to.params.id

@@ -41,7 +41,7 @@
       </div>
       <div class="row ml-1">
         <button type="button" @click="login" class="btn btn-dark btn-lg col-1">Log in</button>
-        <button type="button" @click="fbLogin" class="btn btn-dark btn-lg offset-1">Log in with Facebook</button>
+        <!-- <button type="button" @click="fbLogin" class="btn btn-dark btn-lg offset-1">Log in with Facebook</button> -->
       </div>
       <div class="mt-2">
         <router-link to="/forgetPW">Forget Password</router-link>
@@ -52,7 +52,7 @@
 
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
-import * as fb from '@/services/FacebookLogin'
+// import * as fb from '@/services/FacebookLogin'
 // import toastr from 'toastr'
 // import { mapGetters } from 'vuex'
 export default {
@@ -89,11 +89,11 @@ export default {
         this.$store.dispatch('setInfo', { type: 'danger', message: error.response.data.error })
         // toastr.error(error.response.data.error) || (this.error = error.response.data.error)
       }
-    },
-    async fbLogin () {
-      const data = await fb.FbLogin()
-      console.log(data)
     }
+    // async fbLogin () {
+    //   const data = await fb.FbLogin()
+    //   console.log(data)
+    // }
   }
 }
 </script>
