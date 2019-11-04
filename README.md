@@ -1,5 +1,3 @@
-# Fitness Tracker
-
 ## Bootstrap for styling, VueJs as frontend framework, JavaScript (Express for Node.js) at backend and MySQL. 
 
 ## Fully functional application designed in MVC pattern:
