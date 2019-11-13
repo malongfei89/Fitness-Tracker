@@ -1,5 +1,5 @@
 const conn = require('./mysql-connection')
-const bcrypt = require('../../node_modules/bcrypt')
+const bcrypt = require('bcrypt')
 const SALTROUND = 10
 const CustomError = require('./CustomError')
 
