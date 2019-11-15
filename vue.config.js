@@ -1,13 +1,6 @@
 
 module.exports = {
-    publicPath: '/',
-    devServer: {
-        proxy: {
-            '/': {
-                target: 'http://localhost:3000'
-            }
-        }
-    },
+    publicPath: '/~mal1/fitness-tracker/',
     configureWebpack:{
         optimization: {
           splitChunks: {

@@ -4,15 +4,15 @@ import Home from './views/Home'
 import Register from './views/Register'
 import Login from '@/views/Login'
 import User from '@/views/User'
-// import MyProfile from '@/views/MyProfile'
-// import ChangePw from '@/views/ChangePw'
-// import SearchFriend from '@/views/SearchFriend'
-// import AddPost from '@/views/AddPost'
+import MyProfile from '@/views/MyProfile'
+import ChangePw from '@/views/ChangePw'
+import SearchFriend from '@/views/SearchFriend'
+import AddPost from '@/views/AddPost'
 import Inbox from '@/views/Inbox'
-// import Friend from '@/views/Friend'
+import Friend from '@/views/Friend'
 import store from './store'
-// import WorkoutPlan from '@/views/WorkoutPlan'
-// import ForgetPassword from '@/views/ForgetPassword'
+import WorkoutPlan from '@/views/WorkoutPlan'
+import ForgetPassword from '@/views/ForgetPassword'
 Vue.use(Router)
 
 const router = new Router({
@@ -42,27 +42,27 @@ const router = new Router({
     {
       path: '/friend/:id',
       name: 'friend',
-      component: () => import(/* webpackChunkName: "friend" */ './views/Friend.vue')
+      component: Friend
     },
     {
       path: '/myProfile',
       name: 'myProfile',
-      component: () => import(/* webpackChunkName: "myProfile" */ './views/MyProfile.vue')
+      component: MyProfile
     },
     {
       path: '/changePw',
       name: 'changePw',
-      component: () => import(/* webpackChunkName: "changePw" */ './views/ChangePw.vue')
+      component: ChangePw
     },
     {
       path: '/searchFriend',
       name: 'searchFriend',
-      component: () => import(/* webpackChunkName: "searchFriend" */ './views/SearchFriend.vue')
+      component: SearchFriend
     },
     {
       path: '/addPost',
       name: 'addPost',
-      component: () => import(/* webpackChunkName: "addPost" */ './views/AddPost.vue')
+      component: AddPost
     },
     {
       path: '/user/:id/inbox',
@@ -72,12 +72,12 @@ const router = new Router({
     {
       path: '/user/:id/workoutPlan',
       name: 'workoutPlan',
-      component: () => import(/* webpackChunkName: "workoutPlan" */ './views/WorkoutPlan.vue')
+      component: WorkoutPlan
     },
     {
       path: '/forgetPW',
       name: 'forgetPassword',
-      component: () => import(/* webpackChunkName: "forgetPassword" */ './views/ForgetPassword.vue')
+      component: ForgetPassword
     }
   ]
 })

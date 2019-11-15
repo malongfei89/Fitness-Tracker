@@ -1,3 +1,8 @@
 @import 'bootstrap/scss/bootstrap.scss';
 @import 'toastr/toastr.scss';
 @import "vue-select/src/scss/vue-select.scss";
+@media screen and (max-width:630px){
+    #homepic{
+        width:400px;
+    }
+}
