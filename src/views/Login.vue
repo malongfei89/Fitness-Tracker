@@ -39,10 +39,8 @@
           placeholder="Password"
           @resetValue="password = ''"/>
       </div>
-      <div class="row ml-1">
-        <button type="button" @click="login" class="btn btn-dark btn-lg col-1">Log in</button>
+        <button type="button" @click="login" class="btn btn-dark btn-lg">Log in</button>
         <!-- <button type="button" @click="fbLogin" class="btn btn-dark btn-lg offset-1">Log in with Facebook</button> -->
-      </div>
       <div class="mt-2">
         <router-link to="/forgetPW">Forget Password</router-link>
       </div>
